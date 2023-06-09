@@ -2,9 +2,6 @@
 
 public class Film
 {
-    [Name("_id")]
-    public string ID { get; set; }
-
     public string[]? Genres { get; private set; }
 
     [Name("genres")]
