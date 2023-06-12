@@ -1,17 +1,24 @@
-﻿using CsvHelper;
+﻿using System.ComponentModel;
+using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
 
 var movieById = new Dictionary<string, Film>();
+var userByUsername = new Dictionary<string, User>();
 
 var movies = ReadFilms();
 
-var users = ReadUserCsv();
-
-var ratings = ReadRatingsCsv();
-
 foreach (var movie in movies)
     movieById[movie.MovieId] = movie;
+
+var users = ReadUserCsv();
+foreach (var user in users)
+{
+    userByUsername[user.username] = user;
+}
+AddReviewsToUsers(users);
+CreateSpace(users);
+Console.WriteLine(users);
 
 
 // var userPoints = CreateSpace(users, ratings);
@@ -71,7 +78,7 @@ List<User> ReadUserCsv()
     return sortedRecords.ToList();
 }
 
-List<Rating> ReadRatingsCsv()
+void AddReviewsToUsers(List<User> users)
 {
     const string moviePath1 = "ratings_export.csv";
     const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\ratings_export.csv";
@@ -90,69 +97,50 @@ List<Rating> ReadRatingsCsv()
                 rating_val = csv.GetField<int>("rating_val"),
                 user_id = csv.GetField("user_id")
             };
-            records.Add(record);
-        }
-        
-        var sortedRecords = records.OrderBy(R => R.user_id);
-        return sortedRecords.ToList();
-    }
-}
-
-List<User>? CreateSpace(List<User> users, List<Rating> ratings)
-{
-    var result = new List<User>();
-    var counter = 0;
-    foreach (var userRaw in users)
-    {
-        var user = new User();
-        while (counter < ratings.Count && ratings[counter].user_id == userRaw.username)
-        {
-            var curRating = ratings[counter];
-            var curMovie = curRating.movie_id;
-            counter++;
+            if (!userByUsername.ContainsKey(record.user_id)) continue;
+            var curUser = userByUsername[record.user_id];
+            var curMovie = record.movie_id;
             if (!movieById.ContainsKey(curMovie)) continue;
             foreach (var genre in movieById[curMovie].Genres)
             {
                 switch (genre)
                 {
                     case "Drama":
-                        user.drama.ratings.Add(curRating);
+                        curUser.drama.ratings.Add(record);
                         break;
                     case "Comedy":
-                        user.comedy.ratings.Add(curRating);
+                        curUser.comedy.ratings.Add(record);
                         break;
                     case "Action":
-                        user.action.ratings.Add(curRating);
+                        curUser.action.ratings.Add(record);
                         break;
                     case "Romance":
-                        user.romance.ratings.Add(curRating);
+                        curUser.romance.ratings.Add(record);
                         break;
                     case "Fiction":
-                        user.fiction.ratings.Add(curRating);
+                        curUser.fiction.ratings.Add(record);
                         break;
                     case "Animation":
-                        user.animation.ratings.Add(curRating);
+                        curUser.animation.ratings.Add(record);
                         break;
                     case "Thriller":
-                        user.thriller.ratings.Add(curRating);
+                        curUser.thriller.ratings.Add(record);
                         break;
                     case "Documentary":
-                        user.documentary.ratings.Add(curRating);
+                        curUser.documentary.ratings.Add(record);
                         break;
                 }
-                
             }
-            
-
         }
-
-        user.CountCoordinates();
-
-        result.Add(user);
-
     }
+}
 
-    return result;
+void CreateSpace(List<User> users)
+{
+    foreach (var variableUser in users)
+    {
+        variableUser.CountCoordinates();
+    }
 }
 
 
