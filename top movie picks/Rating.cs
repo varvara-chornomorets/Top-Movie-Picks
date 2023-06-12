@@ -4,7 +4,6 @@ namespace top_movie_picks;
 
 public class Rating
 {
-    public string _id { get; set; }
     public string movie_id{ get; set; }
     [TypeConverter(typeof(ConverterStrToInt))]
     public int rating_val{ get; set; }
