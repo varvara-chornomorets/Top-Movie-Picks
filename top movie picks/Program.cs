@@ -2,21 +2,39 @@
 using System.Globalization;
 using top_movie_picks;
 
+var movieById = new Dictionary<string, Film>();
 
-var films = new List<Film>();
-const string moviePath1 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\movie_data.csv"; // We may need different paths
-using var reader = new StreamReader(moviePath1);
-using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-csv.Read();
-csv.ReadHeader();
+var movies = ReadFilms();
 
-while (csv.Read())
+var users = ReadUserCsv();
+
+var ratings = ReadRatingsCsv();
+
+foreach (var movie in movies)
+    movieById[movie.MovieId] = movie;
+
+
+var userPoints = CreateSpace(users, ratings);
+foreach (var point in userPoints)
+    Console.WriteLine($"{point.animation.average}, {point.action.average}, {point.action.average} ");
+
+List<Film> ReadFilms()
 {
-    try
+    var films = new List<Film>();
+    const string moviePath1 = "movie_data.csv";
+    const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\movie_data.csv";
+    var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
+    using var reader = new StreamReader(path);
+    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+    csv.Read();
+    csv.ReadHeader();
+
+    while (csv.Read())
     {
-        var film = csv.GetRecord<Film>();
-        if (film.Genres != null)
+        try
         {
+            var film = csv.GetRecord<Film>();
+            if (film.Genres == null) continue;
             if (film.Genres.Contains("Drama") || film.Genres.Contains("Comedy") ||
                 film.Genres.Contains("Documentary") || film.Genres.Contains("Thriller") ||
                 film.Genres.Contains("Romance") || film.Genres.Contains("Action") ||
@@ -24,22 +42,17 @@ while (csv.Read())
                 film.Genres.Contains("Science Fiction") || film.Genres.Contains("Fantasy"))
                 films.Add(film);
         }
+        catch (CsvHelper.MissingFieldException) {}
     }
-    catch (CsvHelper.MissingFieldException) {}
+
+    return films;
 }
-Console.WriteLine("Done. ");
 
-List<UserRaw> users = ReadUserCsv("users_export.csv");
-
-List<Rating> ratings = ReadRatingsCsv("ratings_export.csv");
-
-
-// CreateSpace(users, ratings);
-
-
-    
-List<UserRaw> ReadUserCsv(string path)
+List<UserRaw> ReadUserCsv()
 {
+    const string moviePath1 = "users_export.csv";
+    const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\users_export.csv";
+    var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
     using var reader = new StreamReader(path);
     using var csv = new CsvReader(reader, System.Globalization.CultureInfo.InvariantCulture);
     var records = csv.GetRecords<UserRaw>();
@@ -47,8 +60,11 @@ List<UserRaw> ReadUserCsv(string path)
     return sortedRecords.ToList();
 }
 
-List<Rating> ReadRatingsCsv(string path)
+List<Rating> ReadRatingsCsv()
 {
+    const string moviePath1 = "ratings_export.csv";
+    const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\ratings_export.csv";
+    var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
     using var reader = new StreamReader(path);
     using var csv = new CsvReader(reader, System.Globalization.CultureInfo.InvariantCulture);
     var records = csv.GetRecords<Rating>();
@@ -59,16 +75,18 @@ List<Rating> ReadRatingsCsv(string path)
 
 List<User>? CreateSpace(List<UserRaw> users, List<Rating> ratings)
 {
-    List<User> result = new List<User>();
-    int counter = 0;
+    var result = new List<User>();
+    var counter = 0;
     foreach (var userRaw in users)
     {
-        User user = new User();
-        while (ratings[counter].user_id == userRaw.username || counter !=ratings.Count)
+        var user = new User();
+        while (counter < ratings.Count && ratings[counter].user_id == userRaw.username)
         {
             var curRating = ratings[counter];
             var curMovie = curRating.movie_id;
-            foreach (var genre in genreList)
+            counter++;
+            if (!movieById.ContainsKey(curMovie)) continue;
+            foreach (var genre in movieById[curMovie].Genres)
             {
                 switch (genre)
                 {
@@ -97,10 +115,9 @@ List<User>? CreateSpace(List<UserRaw> users, List<Rating> ratings)
                         user.documentary.ratings.Add(curRating);
                         break;
                 }
-
-
-                counter++;
+                
             }
+            
 
         }
 
