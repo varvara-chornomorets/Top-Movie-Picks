@@ -14,9 +14,9 @@ foreach (var movie in movies)
     movieById[movie.MovieId] = movie;
 
 
-var userPoints = CreateSpace(users, ratings);
-foreach (var point in userPoints)
-    Console.WriteLine($"{point.animation.average}, {point.action.average}, {point.action.average} ");
+// var userPoints = CreateSpace(users, ratings);
+// foreach (var point in userPoints)
+//     Console.WriteLine($"{point.animation.average}, {point.action.average}, {point.action.average} ");
 
 List<Film> ReadFilms()
 {
@@ -48,14 +48,25 @@ List<Film> ReadFilms()
     return films;
 }
 
-List<UserRaw> ReadUserCsv()
+List<User> ReadUserCsv()
 {
     const string moviePath1 = "users_export.csv";
     const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\users_export.csv";
     var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
     using var reader = new StreamReader(path);
     using var csv = new CsvReader(reader, System.Globalization.CultureInfo.InvariantCulture);
-    var records = csv.GetRecords<UserRaw>();
+    var records = new List<User>();
+    csv.Read();
+    csv.ReadHeader();
+    while (csv.Read())
+    {
+        var user = new User()
+        {
+            username = csv.GetField("username"),
+            num_reviews = csv.GetField<int>("num_reviews"),
+        };
+        records.Add(user);
+    }
     var sortedRecords = records.OrderBy(U => U.username);
     return sortedRecords.ToList();
 }
@@ -67,13 +78,27 @@ List<Rating> ReadRatingsCsv()
     var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
     using var reader = new StreamReader(path);
     using var csv = new CsvReader(reader, System.Globalization.CultureInfo.InvariantCulture);
-    var records = csv.GetRecords<Rating>();
-    // maybe we could omit here some of the ratings, which are about genres we aren't interested 
-    var sortedRecords = records.OrderBy(R => R.user_id);
-    return sortedRecords.ToList();
+    {
+        var records = new List<Rating>();
+        csv.Read();
+        csv.ReadHeader();
+        while (csv.Read())
+        {
+            var record = new Rating()
+            {
+                movie_id = csv.GetField("movie_id"),
+                rating_val = csv.GetField<int>("rating_val"),
+                user_id = csv.GetField("user_id")
+            };
+            records.Add(record);
+        }
+        
+        var sortedRecords = records.OrderBy(R => R.user_id);
+        return sortedRecords.ToList();
+    }
 }
 
-List<User>? CreateSpace(List<UserRaw> users, List<Rating> ratings)
+List<User>? CreateSpace(List<User> users, List<Rating> ratings)
 {
     var result = new List<User>();
     var counter = 0;

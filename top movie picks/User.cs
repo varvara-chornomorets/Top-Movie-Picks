@@ -2,6 +2,9 @@
 namespace top_movie_picks;
 public class User
 {
+    public int num_reviews { get; set; }
+    public string username { get; set; }
+    
     public Genre drama;
 
     public Genre comedy;
