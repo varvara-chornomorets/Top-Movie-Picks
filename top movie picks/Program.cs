@@ -1,4 +1,5 @@
-﻿using CsvHelper;
+﻿using System.Collections;
+using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
 
@@ -21,28 +22,53 @@ foreach (var point in userPoints)
 List<Film> ReadFilms()
 {
     var films = new List<Film>();
-    const string moviePath1 = "movie_data.csv";
-    const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\movie_data.csv";
-    var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
-    using var reader = new StreamReader(path);
-    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-    csv.Read();
-    csv.ReadHeader();
-
-    while (csv.Read())
+    const string shortMoviePath = "movies.csv";
+    if (File.Exists(shortMoviePath))
     {
-        try
+        using var reader = new StreamReader(shortMoviePath);
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        csv.Read();
+        csv.ReadHeader();
+
+        while (csv.Read())
         {
-            var film = csv.GetRecord<Film>();
-            if (film.Genres == null) continue;
-            if (film.Genres.Contains("Drama") || film.Genres.Contains("Comedy") ||
-                film.Genres.Contains("Documentary") || film.Genres.Contains("Thriller") ||
-                film.Genres.Contains("Romance") || film.Genres.Contains("Action") ||
-                film.Genres.Contains("Animation") || film.Genres.Contains("Adventure") ||
-                film.Genres.Contains("Science Fiction") || film.Genres.Contains("Fantasy"))
+            try
+            {
+                var film = csv.GetRecord<Film>();
                 films.Add(film);
+            }
+            catch (CsvHelper.MissingFieldException) {}
         }
-        catch (CsvHelper.MissingFieldException) {}
+    }
+    else
+    {
+        const string moviePath1 = "movie_data.csv";
+        const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\movie_data.csv";
+        var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
+        using var reader = new StreamReader(path);
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        csv.Read();
+        csv.ReadHeader();
+
+        while (csv.Read())
+        {
+            try
+            {
+                var film = csv.GetRecord<Film>();
+                if (film.Genres == null) continue;
+                if (film.Genres.Contains("Drama") || film.Genres.Contains("Comedy") ||
+                    film.Genres.Contains("Documentary") || film.Genres.Contains("Thriller") ||
+                    film.Genres.Contains("Romance") || film.Genres.Contains("Action") ||
+                    film.Genres.Contains("Animation") || film.Genres.Contains("Adventure") ||
+                    film.Genres.Contains("Science Fiction") || film.Genres.Contains("Fantasy"))
+                    films.Add(film);
+            }
+            catch (CsvHelper.MissingFieldException) {}
+        }
+
+        using var writer = new StreamWriter(shortMoviePath);
+        using var csv2 = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        csv2.WriteRecords((IEnumerable)films);
     }
 
     return films;
