@@ -13,11 +13,10 @@ var ratings = ReadRatingsCsv();
 foreach (var movie in movies)
     movieById[movie.MovieId] = movie;
 
-/*
+
 var userPoints = CreateSpace(users, ratings);
 foreach (var point in userPoints)
-    Console.WriteLine($"{point.animation.average}, {point.action.average}... ");
-*/
+    Console.WriteLine($"{point.animation.average}, {point.action.average}, {point.action.average} ");
 
 List<Film> ReadFilms()
 {
@@ -81,10 +80,11 @@ List<User>? CreateSpace(List<UserRaw> users, List<Rating> ratings)
     foreach (var userRaw in users)
     {
         var user = new User();
-        while (ratings[counter].user_id == userRaw.username || counter !=ratings.Count)
+        while (counter < ratings.Count && ratings[counter].user_id == userRaw.username)
         {
             var curRating = ratings[counter];
             var curMovie = curRating.movie_id;
+            counter++;
             if (!movieById.ContainsKey(curMovie)) continue;
             foreach (var genre in movieById[curMovie].Genres)
             {
@@ -115,10 +115,9 @@ List<User>? CreateSpace(List<UserRaw> users, List<Rating> ratings)
                         user.documentary.ratings.Add(curRating);
                         break;
                 }
-
-
-                counter++;
+                
             }
+            
 
         }
 
