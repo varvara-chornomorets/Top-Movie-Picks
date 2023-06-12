@@ -8,6 +8,7 @@ var movieById = new Dictionary<string, Film>();
 var userByUsername = new Dictionary<string, User>();
 
 var movies = ReadFilms();
+Console.WriteLine("Movies picked! ");
 
 foreach (var movie in movies)
     movieById[movie.MovieId] = movie;
@@ -17,9 +18,14 @@ foreach (var user in users)
 {
     userByUsername[user.username] = user;
 }
+Console.WriteLine("Users pickled! ");
+Console.WriteLine("Working on reviews... ");
+
 AddReviewsToUsers(users);
+Console.WriteLine("Reviews added! ");
 CreateSpace(users);
-Console.WriteLine(users);
+foreach (var user in users)
+    Console.WriteLine(user);
 
 
 // var userPoints = CreateSpace(users, ratings);
@@ -110,14 +116,14 @@ void AddReviewsToUsers(List<User> users)
     const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\ratings_export.csv";
     var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
     using var reader = new StreamReader(path);
-    using var csv = new CsvReader(reader, System.Globalization.CultureInfo.InvariantCulture);
+    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
     {
         var records = new List<Rating>();
         csv.Read();
         csv.ReadHeader();
         while (csv.Read())
         {
-            var record = new Rating()
+            var record = new Rating
             {
                 movie_id = csv.GetField("movie_id"),
                 rating_val = csv.GetField<int>("rating_val"),

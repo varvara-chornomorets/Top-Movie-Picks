@@ -60,6 +60,8 @@ public class User
         }
     }
 
-    
-
+    public override string ToString()
+    {
+        return $"{username} -- {num_reviews}: {drama} - {comedy} - {action} - {romance} - {fiction} - {animation} - {thriller} - {documentary}";
+    }
 }

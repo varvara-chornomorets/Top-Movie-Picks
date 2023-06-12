@@ -10,4 +10,9 @@ public class Genre
         ratings = new List<Rating>();
         average = 0;
     }
+
+    public override string ToString()
+    {
+        return $"{Math.Round(average, 2)}";
+    }
 }
