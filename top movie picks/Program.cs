@@ -96,13 +96,13 @@ List<User>? CreateSpace(List<UserRaw> users, List<Rating> ratings)
                     case "Comedy":
                         user.comedy.ratings.Add(curRating);
                         break;
-                    case "Action":
+                    case "Action" or "Adventure":
                         user.action.ratings.Add(curRating);
                         break;
                     case "Romance":
                         user.romance.ratings.Add(curRating);
                         break;
-                    case "Fiction":
+                    case "Science Fiction" or "Fantasy":
                         user.fiction.ratings.Add(curRating);
                         break;
                     case "Animation":
