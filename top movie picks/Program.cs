@@ -23,7 +23,12 @@ Console.WriteLine("Working on reviews... ");
 
 AddReviewsToUsers(users);
 Console.WriteLine("Reviews added! ");
+
+Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews()}");
+
 CreateSpace(users);
+Console.WriteLine("Press any button, if you want to see \"Space\": ");
+Console.ReadKey();
 foreach (var user in users)
     Console.WriteLine(user);
 
@@ -99,11 +104,7 @@ List<User> ReadUserCsv()
     csv.ReadHeader();
     while (csv.Read())
     {
-        var user = new User()
-        {
-            username = csv.GetField("username"),
-            num_reviews = csv.GetField<int>("num_reviews"),
-        };
+        var user = csv.GetRecord<User>();
         records.Add(user);
     }
     var sortedRecords = records.OrderBy(U => U.username);
@@ -123,12 +124,7 @@ void AddReviewsToUsers(List<User> users)
         csv.ReadHeader();
         while (csv.Read())
         {
-            var record = new Rating
-            {
-                movie_id = csv.GetField("movie_id"),
-                rating_val = csv.GetField<int>("rating_val"),
-                user_id = csv.GetField("user_id")
-            };
+            var record = csv.GetRecord<Rating>();
             if (!userByUsername.ContainsKey(record.user_id)) continue;
             var curUser = userByUsername[record.user_id];
             var curMovie = record.movie_id;
@@ -165,6 +161,24 @@ void AddReviewsToUsers(List<User> users)
             }
         }
     }
+}
+
+int DeleteUsersWithoutReviews()
+{
+    var counter = 0;
+    var usersToDelete = new List<User>();
+    foreach (var user in users.Where(user => user.Genres.All(genre => genre.ratings.Count == 0)))
+    {
+        usersToDelete.Add(user);
+        counter++;
+    }
+
+    foreach (var user in usersToDelete)
+    {
+        users.Remove(user);
+    }
+
+    return counter;
 }
 
 void CreateSpace(List<User> users)
