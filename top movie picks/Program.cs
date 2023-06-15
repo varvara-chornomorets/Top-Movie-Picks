@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.Collections;
 using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
@@ -7,6 +7,7 @@ var movieById = new Dictionary<string, Film>();
 var userByUsername = new Dictionary<string, User>();
 
 var movies = ReadFilms();
+Console.WriteLine("Movies picked! ");
 
 foreach (var movie in movies)
     movieById[movie.MovieId] = movie;
@@ -16,40 +17,72 @@ foreach (var user in users)
 {
     userByUsername[user.username] = user;
 }
-AddReviewsToUsers(users);
+Console.WriteLine("Users pickled! ");
+Console.WriteLine("Working on reviews... ");
+
+AddReviewsToUsers(); 
+Console.WriteLine("Reviews added! ");
+
+Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews()}");
+
 CreateSpace(users);
-Console.WriteLine(users);
+Console.WriteLine("Press any button, if you want to see \"Space\": ");
+Console.ReadKey();
+foreach (var user in users)
+    Console.WriteLine(user);
 
 
-// var userPoints = CreateSpace(users, ratings);
-// foreach (var point in userPoints)
-//     Console.WriteLine($"{point.animation.average}, {point.action.average}, {point.action.average} ");
 
 List<Film> ReadFilms()
 {
     var films = new List<Film>();
-    const string moviePath1 = "movie_data.csv";
-    const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\movie_data.csv";
-    var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
-    using var reader = new StreamReader(path);
-    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-    csv.Read();
-    csv.ReadHeader();
-
-    while (csv.Read())
+    const string shortMoviePath = "movies.csv";
+    if (File.Exists(shortMoviePath))
     {
-        try
+        using var reader = new StreamReader(shortMoviePath);
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        csv.Read();
+        csv.ReadHeader();
+
+        while (csv.Read())
         {
-            var film = csv.GetRecord<Film>();
-            if (film.Genres == null) continue;
-            if (film.Genres.Contains("Drama") || film.Genres.Contains("Comedy") ||
-                film.Genres.Contains("Documentary") || film.Genres.Contains("Thriller") ||
-                film.Genres.Contains("Romance") || film.Genres.Contains("Action") ||
-                film.Genres.Contains("Animation") || film.Genres.Contains("Adventure") ||
-                film.Genres.Contains("Science Fiction") || film.Genres.Contains("Fantasy"))
+            try
+            {
+                var film = csv.GetRecord<Film>();
                 films.Add(film);
+            }
+            catch (CsvHelper.MissingFieldException) {}
         }
-        catch (CsvHelper.MissingFieldException) {}
+    }
+    else
+    {
+        const string moviePath1 = "movie_data.csv";
+        const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\movie_data.csv";
+        var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
+        using var reader = new StreamReader(path);
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        csv.Read();
+        csv.ReadHeader();
+
+        while (csv.Read())
+        {
+            try
+            {
+                var film = csv.GetRecord<Film>();
+                if (film.Genres == null) continue;
+                if (film.Genres.Contains("Drama") || film.Genres.Contains("Comedy") ||
+                    film.Genres.Contains("Documentary") || film.Genres.Contains("Thriller") ||
+                    film.Genres.Contains("Romance") || film.Genres.Contains("Action") ||
+                    film.Genres.Contains("Animation") || film.Genres.Contains("Adventure") ||
+                    film.Genres.Contains("Science Fiction") || film.Genres.Contains("Fantasy"))
+                    films.Add(film);
+            }
+            catch (CsvHelper.MissingFieldException) {}
+        }
+
+        using var writer = new StreamWriter(shortMoviePath);
+        using var csv2 = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        csv2.WriteRecords((IEnumerable)films);
     }
 
     return films;
@@ -67,36 +100,25 @@ List<User> ReadUserCsv()
     csv.ReadHeader();
     while (csv.Read())
     {
-        var user = new User()
-        {
-            username = csv.GetField("username"),
-            num_reviews = csv.GetField<int>("num_reviews"),
-        };
+        var user = csv.GetRecord<User>();
         records.Add(user);
     }
-    var sortedRecords = records.OrderBy(U => U.username);
-    return sortedRecords.ToList();
+    return records;
 }
 
-void AddReviewsToUsers(List<User> users)
+void AddReviewsToUsers()
 {
     const string moviePath1 = "ratings_export.csv";
     const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\ratings_export.csv";
     var path = File.Exists(moviePath1) ? moviePath1 : moviePath2;
     using var reader = new StreamReader(path);
-    using var csv = new CsvReader(reader, System.Globalization.CultureInfo.InvariantCulture);
+    using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
     {
-        var records = new List<Rating>();
         csv.Read();
         csv.ReadHeader();
         while (csv.Read())
         {
-            var record = new Rating()
-            {
-                movie_id = csv.GetField("movie_id"),
-                rating_val = csv.GetField<int>("rating_val"),
-                user_id = csv.GetField("user_id")
-            };
+            var record = csv.GetRecord<Rating>();
             if (!userByUsername.ContainsKey(record.user_id)) continue;
             var curUser = userByUsername[record.user_id];
             var curMovie = record.movie_id;
@@ -111,13 +133,13 @@ void AddReviewsToUsers(List<User> users)
                     case "Comedy":
                         curUser.comedy.ratings.Add(record);
                         break;
-                    case "Action":
+                    case "Action" or "Adventure":
                         curUser.action.ratings.Add(record);
                         break;
                     case "Romance":
                         curUser.romance.ratings.Add(record);
                         break;
-                    case "Fiction":
+                    case "Science Fiction" or "Fantasy":
                         curUser.fiction.ratings.Add(record);
                         break;
                     case "Animation":
@@ -133,6 +155,24 @@ void AddReviewsToUsers(List<User> users)
             }
         }
     }
+}
+
+int DeleteUsersWithoutReviews()
+{
+    var counter = 0;
+    var usersToDelete = new List<User>();
+    foreach (var user in users.Where(user => user.Genres.All(genre => genre.ratings.Count == 0)))
+    {
+        usersToDelete.Add(user);
+        counter++;
+    }
+
+    foreach (var user in usersToDelete)
+    {
+        users.Remove(user);
+    }
+
+    return counter;
 }
 
 void CreateSpace(List<User> users)
