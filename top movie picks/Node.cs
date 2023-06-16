@@ -2,66 +2,54 @@
 
 public class Node
 {
-    public User[]? Users { get; set; }
-    public Node? Left { get; set; }
-    public Node? Right { get; set; }
-    public genre Genre { get; set; }
+    public Node? Left { get; }
+    public Node? Right { get; }
+    public User Value { get; }
+    public genre Genre { get; }
     
 
     public Node(User[] users, genre genre)
     {
-        if (users.Length <= 10)
-        {
-            Users = users;
-            return;
-        }
-
-        var dividedUsers = DividedUsers(users);
         Genre = genre;
-        Left = new Node(dividedUsers[0], NextGenre(Genre));
-        Right = new Node(dividedUsers[1], NextGenre(Genre));
+        var middle = users.Length / 2;
+        var sortedUsers = SortUsers(users);
+        Value = sortedUsers[middle];
+        switch (sortedUsers.Length)
+        {
+            case 1:
+                return;
+            case > 2:
+                Left = new Node(sortedUsers[..middle], NextGenre(Genre));
+                Right = new Node(sortedUsers[(middle + 1)..], NextGenre(Genre));
+                return;
+            default:
+                Left = new Node(sortedUsers[..middle], NextGenre(Genre));
+                break;
+        }
     }
 
-    public User[][] DividedUsers(User[] users)
+    public User[] SortUsers(User[] users)
     {
-        // Sort by dimension
-        var middle = users.Length / 2;
-        User[]? sortedUsers;
         switch (Genre)
         {
             case genre.drama:
-                sortedUsers = users.OrderBy(user => user.drama.average).ToArray();
-                break;
+                return users.OrderBy(user => user.drama.average).ToArray();
             case genre.action:
-                sortedUsers = users.OrderBy(user => user.action.average).ToArray();
-                break;
+                return users.OrderBy(user => user.action.average).ToArray();
             case genre.animation:
-                sortedUsers = users.OrderBy(user => user.animation.average).ToArray();
-                break;
+                return users.OrderBy(user => user.animation.average).ToArray();
             case genre.documentary:
-                sortedUsers = users.OrderBy(user => user.documentary.average).ToArray();
-                break;
+                return users.OrderBy(user => user.documentary.average).ToArray();
             case genre.fiction:
-                sortedUsers = users.OrderBy(user => user.fiction.average).ToArray();
-                break;
+                return users.OrderBy(user => user.fiction.average).ToArray();
             case genre.comedy:
-                sortedUsers = users.OrderBy(user => user.comedy.average).ToArray();
-                break;
+                return users.OrderBy(user => user.comedy.average).ToArray();
             case genre.romance:
-                sortedUsers = users.OrderBy(user => user.romance.average).ToArray();
-                break;
+                return users.OrderBy(user => user.romance.average).ToArray();
             default:
             case genre.thriller:
-                sortedUsers = users.OrderBy(user => user.thriller.average).ToArray();
-                break;
+                return users.OrderBy(user => user.thriller.average).ToArray();
         }
-        // Get first half
-        // Get second half
-        return new[]
-        {
-            sortedUsers.Take(middle).ToArray(),
-            sortedUsers.Skip(middle).ToArray()
-        };
     }
 
     public genre NextGenre(genre genre)
