@@ -3,33 +3,39 @@ using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
 
-var movieById = new Dictionary<string, Film>();
-var userByUsername = new Dictionary<string, User>();
+Preparation();
 
-var movies = ReadFilms();
-Console.WriteLine("Movies picked! ");
-
-foreach (var movie in movies)
-    movieById[movie.MovieId] = movie;
-
-var users = ReadUserCsv();
-foreach (var user in users)
+void Preparation()
 {
-    userByUsername[user.username] = user;
+    var movieById = new Dictionary<string, Film>();
+    var userByUsername = new Dictionary<string, User>();
+
+    var movies = ReadFilms();
+    Console.WriteLine("Movies picked! ");
+
+    foreach (var movie in movies)
+        movieById[movie.MovieId] = movie;
+
+    var users = ReadUserCsv();
+    foreach (var user in users)
+    {
+        userByUsername[user.username] = user;
+    }
+    Console.WriteLine("Users pickled! ");
+    Console.WriteLine("Working on reviews... ");
+
+    AddReviewsToUsers(userByUsername, movieById); 
+    Console.WriteLine("Reviews added! ");
+
+    Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
+
+    CreateSpace(users);
+    Console.WriteLine("Press any button, if you want to see \"Space\": ");
+    Console.ReadKey();
+    foreach (var user in users)
+        Console.WriteLine(user);
+
 }
-Console.WriteLine("Users pickled! ");
-Console.WriteLine("Working on reviews... ");
-
-AddReviewsToUsers(); 
-Console.WriteLine("Reviews added! ");
-
-Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews()}");
-
-CreateSpace(users);
-Console.WriteLine("Press any button, if you want to see \"Space\": ");
-Console.ReadKey();
-foreach (var user in users)
-    Console.WriteLine(user);
 
 
 
@@ -106,7 +112,7 @@ List<User> ReadUserCsv()
     return records;
 }
 
-void AddReviewsToUsers()
+void AddReviewsToUsers(Dictionary<string, User> userByUsername, Dictionary<string, Film> movieById)
 {
     const string moviePath1 = "ratings_export.csv";
     const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\ratings_export.csv";
@@ -157,7 +163,7 @@ void AddReviewsToUsers()
     }
 }
 
-int DeleteUsersWithoutReviews()
+int DeleteUsersWithoutReviews(List<User> users)
 {
     var counter = 0;
     var usersToDelete = new List<User>();
