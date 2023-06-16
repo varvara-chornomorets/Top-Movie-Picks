@@ -28,6 +28,7 @@ Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews()}");
 
 CreateSpace(users);
 Console.WriteLine("Press any button, if you want to see \"Space\": ");
+var userTree = new K_dTree(users.ToArray());
 Console.ReadKey();
 foreach (var user in users)
     Console.WriteLine(user);
