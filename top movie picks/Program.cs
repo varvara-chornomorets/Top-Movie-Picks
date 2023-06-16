@@ -4,9 +4,42 @@ using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
 
-Preparation();
+Console.WriteLine("hello, out precious user! let us prepare real quick :} ");
+List<User> space = Preparation();
+User preciousUser = new User();
+Console.WriteLine("let the magic begin! firstly, we want to get to know you! so, please, give us your recommendations" +
+                  "by typing in 'recommend <movie_name> <your rate from 1 to 10>'");
+string whenCommandIsWrong = "no such command. available command is: " +
+                            "recommend <movie_name> <your rate from 1 to 10>";
+while (true)
+{
+    string command = Console.ReadLine();
+    if (command.Contains("rate"))
+    {
+        Rate(command, space);
+        continue;
+    }
 
-void Preparation()
+    if (command.Contains("recommend"))
+    {
+        Recommend(command, space);
+        continue;
+    }
+
+    Console.WriteLine(whenCommandIsWrong);
+}
+
+void Rate(string command, List<User> space)
+{
+    
+}
+void Recommend(string command, List<User> space)
+{
+    
+}
+
+
+List<User> Preparation()
 {
     var movieById = new Dictionary<string, Film>();
     var userByUsername = new Dictionary<string, User>();
@@ -31,14 +64,13 @@ void Preparation()
     Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
 
     CreateSpace(users);
-    Console.WriteLine("Press any button, if you want to see \"Space\": ");
-    Console.ReadKey();
-    foreach (var user in users)
-        Console.WriteLine(user);
+    return users;
+    // Console.WriteLine("Press any button, if you want to see \"Space\": ");
+    // Console.ReadKey();
+    // foreach (var user in users)
+    //     Console.WriteLine(user);
 
 }
-
-
 
 List<Film> ReadFilms()
 {
