@@ -7,6 +7,7 @@ public class Film
     [Name("genres")]
     public string GenresString
     {
+        get => Genres != null ? string.Join(",", Genres) : string.Empty;
         set => Genres = makeArray(value);
     }
     
