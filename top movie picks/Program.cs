@@ -10,8 +10,10 @@ User preciousUser = new User();
 Console.WriteLine("let the magic begin! firstly, we want to get to know you! so, please, give us your reviews" +
                   "by typing in \n'rate <movie_name> <your rate from 1 to 10>'");
 string whenCommandIsWrong = "we regret to inform you that there is " +
-                            "no such command. \navailable command is: " +
-                            "rate <movie_name> <your rate from 1 to 10>";
+                            "no such command. \navailable commands are: " +
+                            "rate <movie_name> <your rate from 1 to 10>" +
+                            "/n discover";
+
 while (true)
 {
     string command = Console.ReadLine();
@@ -21,9 +23,9 @@ while (true)
         continue;
     }
 
-    if (command.Contains("recommend"))
+    if (command.Contains("discover"))
     {
-        Recommend(command);
+        Discover(command);
         continue;
     }
 
@@ -48,47 +50,20 @@ void Rate(string command)
         return;
     }
 
-    Film movie = movieByName[movieName];
+    Film curMovie = movieByName[movieName];
     // i haven't done it yet, but we need to check if user gives us new review, or just repeats itself
-    Rating rating = new Rating();
-    rating.rating_val = intRatingVal;
-    rating.movie_id = movie.MovieId;
-    foreach (var genre in movie.Genres)
+    var rating = new Rating
     {
-        switch (genre)
-        {
-            case "Drama":
-                preciousUser.drama.ratings.Add(rating);
-                break;
-            case "Comedy":
-                preciousUser.comedy.ratings.Add(rating);
-                break;
-            case "Action" or "Adventure":
-                preciousUser.action.ratings.Add(rating);
-                break;
-            case "Romance":
-                preciousUser.romance.ratings.Add(rating);
-                break;
-            case "Science Fiction" or "Fantasy":
-                preciousUser.fiction.ratings.Add(rating);
-                break;
-            case "Animation":
-                preciousUser.animation.ratings.Add(rating);
-                break;
-            case "Thriller":
-                preciousUser.thriller.ratings.Add(rating);
-                break;
-            case "Documentary":
-                preciousUser.documentary.ratings.Add(rating);
-                break;
-        }
-    }
+        rating_val = intRatingVal,
+        movie_id = curMovie.MovieId
+    };
+    preciousUser.AddRating(rating, curMovie.Genres);
     Console.WriteLine("okay, we've got your review, let's continue");
     Console.WriteLine(preciousUser);
 }
-void Recommend(string command)
+void Discover(string command)
 {
-    
+    preciousUser.CountCoordinates();
 }
 
 
@@ -215,36 +190,8 @@ void AddReviewsToUsers(Dictionary<string, User> userByUsername, Dictionary<strin
             var curUser = userByUsername[record.user_id];
             var curMovie = record.movie_id;
             if (!movieById.ContainsKey(curMovie)) continue;
-            foreach (var genre in movieById[curMovie].Genres)
-            {
-                switch (genre)
-                {
-                    case "Drama":
-                        curUser.drama.ratings.Add(record);
-                        break;
-                    case "Comedy":
-                        curUser.comedy.ratings.Add(record);
-                        break;
-                    case "Action" or "Adventure":
-                        curUser.action.ratings.Add(record);
-                        break;
-                    case "Romance":
-                        curUser.romance.ratings.Add(record);
-                        break;
-                    case "Science Fiction" or "Fantasy":
-                        curUser.fiction.ratings.Add(record);
-                        break;
-                    case "Animation":
-                        curUser.animation.ratings.Add(record);
-                        break;
-                    case "Thriller":
-                        curUser.thriller.ratings.Add(record);
-                        break;
-                    case "Documentary":
-                        curUser.documentary.ratings.Add(record);
-                        break;
-                }
-            }
+            string[] genres = movieById[curMovie].Genres;
+            curUser.AddRating(record, genres);
         }
     }
 }

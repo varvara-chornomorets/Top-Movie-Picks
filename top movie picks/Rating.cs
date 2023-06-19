@@ -10,9 +10,19 @@ public class Rating
     public int rating_val{ get; set; }
     public string user_id{ get; set; }
     
-    // public Rating(string movieId, int ratingVal)
-    // {
-    //     movie_id = movieId;
-    //     rating_val = ratingVal;
-    // }
+    
+    // i haven't used it yet, but it may be useful
+    public override bool Equals(object obj)
+    {
+        if (obj == null || GetType() != obj.GetType())
+        {
+            return false;
+        }
+
+        Rating other = (Rating)obj;
+
+        return movie_id == other.movie_id &&
+               rating_val == other.rating_val &&
+               user_id == other.user_id;
+    }
 }
