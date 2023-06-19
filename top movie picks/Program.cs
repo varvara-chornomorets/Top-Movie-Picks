@@ -12,7 +12,7 @@ Console.WriteLine("let the magic begin! firstly, we want to get to know you! so,
 string whenCommandIsWrong = "we regret to inform you that there is " +
                             "no such command. \navailable commands are: " +
                             "rate <movie_name> <your rate from 1 to 10>" +
-                            "/n discover";
+                            "\n discover";
 
 while (true)
 {
@@ -23,6 +23,11 @@ while (true)
         continue;
     }
 
+    if (command.Contains("recommend"))
+    {
+        Recommend(command);
+        continue;
+    }
     if (command.Contains("discover"))
     {
         Discover(command);
@@ -32,6 +37,10 @@ while (true)
     Console.WriteLine(whenCommandIsWrong);
 }
 
+void Recommend(string command)
+{
+    
+}
 void Rate(string command)
 {
     var commandArr = command.Split(" ");
