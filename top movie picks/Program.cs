@@ -85,13 +85,9 @@ void Discover(string command)
     var movieNames = new Dictionary<string, Film>();
 
     var movies = ReadFilms();
-    var popularityRates = new List<string>();
-    var voteAverage = new List<string>();
     Console.WriteLine("Movies picked! ");
     foreach (var movie in movies)
     {
-        popularityRates.Add(movie.Popularity);
-        popularityRates.Add(movie.VoteAverage);
         Console.Write($"{movie.Popularity}, {movie.VoteAverage};");
         Console.ReadLine();
     }

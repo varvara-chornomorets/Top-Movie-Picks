@@ -1,4 +1,5 @@
-﻿using CsvHelper.Configuration.Attributes;
+﻿using System.Globalization;
+using CsvHelper.Configuration.Attributes;
 
 public class Film
 {
@@ -17,12 +18,15 @@ public class Film
     [Name("movie_id")]
     public string MovieId { get; set; }
     
-    [Name("popularity")] 
-    public string Popularity { get; set; }
-    
-    [Name("vote_average")] 
-    public string VoteAverage { get; set; }
-    
+    [Name("popularity")] public string PopularityString { private get; set; }
+
+    public double Popularity => PopularityString == "null" ? 0 : double.Parse(PopularityString, CultureInfo.InvariantCulture);
+
+
+    [Name("vote_average")] public string VoteAverageString { private get; set; }
+
+    public double VoteAverage => VoteAverageString == "null" ? 0 : double.Parse(VoteAverageString, CultureInfo.InvariantCulture);
+
     [Name("movie_title")]
     public string MovieTitle { get; set; }
     
