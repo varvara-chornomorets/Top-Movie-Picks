@@ -25,7 +25,7 @@ while (true)
 
     if (command.Contains("recommend"))
     {
-        Recommend(command);
+        Recommend();
         continue;
     }
     if (command.Contains("discover"))
@@ -37,9 +37,11 @@ while (true)
     Console.WriteLine(whenCommandIsWrong);
 }
 
-void Recommend(string command)
-{
-    
+void Recommend()
+{/*
+    var range = 0.2;
+    var user = preciousUser;
+    var allNeighboursInArea = */
 }
 void Rate(string command)
 {
@@ -83,7 +85,18 @@ void Discover(string command)
     var movieNames = new Dictionary<string, Film>();
 
     var movies = ReadFilms();
+    var popularityRates = new List<string>();
+    var voteAverage = new List<string>();
     Console.WriteLine("Movies picked! ");
+    foreach (var movie in movies)
+    {
+        popularityRates.Add(movie.Popularity);
+        popularityRates.Add(movie.VoteAverage);
+        Console.Write($"{movie.Popularity}, {movie.VoteAverage};");
+        Console.ReadLine();
+    }
+
+    Console.ReadLine();
 
     foreach (var movie in movies)
     {
@@ -112,7 +125,7 @@ void Discover(string command)
 List<Film> ReadFilms()
 {
     var films = new List<Film>();
-    const string shortMoviePath = "movies.csv";
+    const string shortMoviePath = "movies.csv";/*
     if (File.Exists(shortMoviePath))
     {
         using var reader = new StreamReader(shortMoviePath);
@@ -120,7 +133,7 @@ List<Film> ReadFilms()
         films.AddRange(csvReader.GetRecords<Film>());
         return films;
     }
-    else
+    else*/
     {
         const string moviePath1 = "movie_data.csv";
         const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\movie_data.csv";

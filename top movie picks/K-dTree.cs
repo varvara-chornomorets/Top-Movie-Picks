@@ -8,4 +8,14 @@ public class K_dTree
     {
         Root = new Node(users, genre.drama);
     }
+/*
+    public Node[] FindNeighbours(double range)
+    {
+        return FindNeighbours(Root, range);
+        Node[] FindNeighbours(Node currentNode, double range)
+        {
+            var genre = currentNode.Genre;
+            retur
+        }
+    }*/
 }

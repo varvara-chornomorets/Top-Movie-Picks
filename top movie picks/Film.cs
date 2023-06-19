@@ -17,6 +17,12 @@ public class Film
     [Name("movie_id")]
     public string MovieId { get; set; }
     
+    [Name("popularity")] 
+    public string Popularity { get; set; }
+    
+    [Name("vote_average")] 
+    public string VoteAverage { get; set; }
+    
     [Name("movie_title")]
     public string MovieTitle { get; set; }
     
@@ -47,14 +53,14 @@ public class Film
     movie_title
 ----original_language
     overview
-----popularity
+    popularity
 -11-production_countries
     release_date
 ----runtime
 ----spoken_languages
 ----tmdb_id
     tmdb_link
-----vote_average
+    vote_average
 ----vote_count
 ----year_released
 
