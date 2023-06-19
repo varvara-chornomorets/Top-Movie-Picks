@@ -107,19 +107,9 @@ List<Film> ReadFilms()
     if (File.Exists(shortMoviePath))
     {
         using var reader = new StreamReader(shortMoviePath);
-        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-        csv.Read();
-        csv.ReadHeader();
-
-        while (csv.Read())
-        {
-            try
-            {
-                var film = csv.GetRecord<Film>();
-                films.Add(film);
-            }
-            catch (CsvHelper.MissingFieldException) {}
-        }
+        using var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture);
+        films.AddRange(csvReader.GetRecords<Film>());
+        return films;
     }
     else
     {

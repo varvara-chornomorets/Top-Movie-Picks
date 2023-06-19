@@ -65,7 +65,7 @@ public class User
                 globalMinimum = localMinimum;
             var localMaximum = genre.ratings.Select(rate => rate.rating_val).Max();
             if (localMaximum > globalMaximum)
-                globalMinimum = localMaximum;
+                globalMaximum = localMaximum;
             genre.average = genre.ratings.Average(rating => rating.rating_val);
         }
 
