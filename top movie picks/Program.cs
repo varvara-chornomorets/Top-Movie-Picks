@@ -4,58 +4,116 @@ using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
 
-Console.WriteLine("hello, out precious user! let us prepare real quick :} ");
-List<User> space = Preparation();
+Console.WriteLine("hello, out precious user! \nlet us prepare real quick :} ");
+(List<User> space, Dictionary<string, Film> movieByName) = Preparation();
 User preciousUser = new User();
-Console.WriteLine("let the magic begin! firstly, we want to get to know you! so, please, give us your recommendations" +
-                  "by typing in 'recommend <movie_name> <your rate from 1 to 10>'");
-string whenCommandIsWrong = "no such command. available command is: " +
-                            "recommend <movie_name> <your rate from 1 to 10>";
+Console.WriteLine("let the magic begin! firstly, we want to get to know you! so, please, give us your reviews" +
+                  "by typing in \n'rate <movie_name> <your rate from 1 to 10>'");
+string whenCommandIsWrong = "we regret to inform you that there is " +
+                            "no such command. \navailable command is: " +
+                            "rate <movie_name> <your rate from 1 to 10>";
 while (true)
 {
     string command = Console.ReadLine();
     if (command.Contains("rate"))
     {
-        Rate(command, space);
+        Rate(command);
         continue;
     }
 
     if (command.Contains("recommend"))
     {
-        Recommend(command, space);
+        Recommend(command);
         continue;
     }
 
     Console.WriteLine(whenCommandIsWrong);
 }
 
-void Rate(string command, List<User> space)
+void Rate(string command)
 {
-    
+    var commandArr = command.Split(" ");
+    var ratingVal = commandArr[^1];
+    if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
+    {
+        Console.WriteLine("looks like your rate is not valid");
+        return;
+    }
+    var movieNameArr = commandArr[1..^1];
+    var movieName = string.Join(" ", movieNameArr);
+    if (!movieByName.ContainsKey(movieName))
+    {
+        Console.WriteLine("looks like we don't know this movie or you made a typo");
+        // later we can add there check for typos i guess
+        return;
+    }
+
+    Film movie = movieByName[movieName];
+    // i haven't done it yet, but we need to check if user gives us new review, or just repeats itself
+    Rating rating = new Rating();
+    rating.rating_val = intRatingVal;
+    rating.movie_id = movie.MovieId;
+    foreach (var genre in movie.Genres)
+    {
+        switch (genre)
+        {
+            case "Drama":
+                preciousUser.drama.ratings.Add(rating);
+                break;
+            case "Comedy":
+                preciousUser.comedy.ratings.Add(rating);
+                break;
+            case "Action" or "Adventure":
+                preciousUser.action.ratings.Add(rating);
+                break;
+            case "Romance":
+                preciousUser.romance.ratings.Add(rating);
+                break;
+            case "Science Fiction" or "Fantasy":
+                preciousUser.fiction.ratings.Add(rating);
+                break;
+            case "Animation":
+                preciousUser.animation.ratings.Add(rating);
+                break;
+            case "Thriller":
+                preciousUser.thriller.ratings.Add(rating);
+                break;
+            case "Documentary":
+                preciousUser.documentary.ratings.Add(rating);
+                break;
+        }
+    }
+    Console.WriteLine("okay, we've got your review, let's continue");
+    Console.WriteLine(preciousUser);
 }
-void Recommend(string command, List<User> space)
+void Recommend(string command)
 {
     
 }
 
 
-List<User> Preparation()
+(List<User>  users, Dictionary<string, Film> movieNames) Preparation()
 {
     var movieById = new Dictionary<string, Film>();
     var userByUsername = new Dictionary<string, User>();
+    var movieNames = new Dictionary<string, Film>();
 
     var movies = ReadFilms();
     Console.WriteLine("Movies picked! ");
 
     foreach (var movie in movies)
+    {
         movieById[movie.MovieId] = movie;
+        movieNames[movie.MovieTitle] = movie;
+    }
+        
 
     var users = ReadUserCsv();
     foreach (var user in users)
     {
         userByUsername[user.username] = user;
     }
-    Console.WriteLine("Users pickled! ");
+    Console.WriteLine("Users picked! ");
     Console.WriteLine("Working on reviews... ");
 
     AddReviewsToUsers(userByUsername, movieById); 
@@ -64,12 +122,7 @@ List<User> Preparation()
     Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
 
     CreateSpace(users);
-    return users;
-    // Console.WriteLine("Press any button, if you want to see \"Space\": ");
-    // Console.ReadKey();
-    // foreach (var user in users)
-    //     Console.WriteLine(user);
-
+    return (users, movieNames);
 }
 
 List<Film> ReadFilms()
