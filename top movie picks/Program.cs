@@ -121,7 +121,7 @@ void Discover(string command)
 List<Film> ReadFilms()
 {
     var films = new List<Film>();
-    const string shortMoviePath = "movies.csv";/*
+    const string shortMoviePath = "movies.csv";
     if (File.Exists(shortMoviePath))
     {
         using var reader = new StreamReader(shortMoviePath);
@@ -129,7 +129,7 @@ List<Film> ReadFilms()
         films.AddRange(csvReader.GetRecords<Film>());
         return films;
     }
-    else*/
+    else
     {
         const string moviePath1 = "movie_data.csv";
         const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\movie_data.csv";

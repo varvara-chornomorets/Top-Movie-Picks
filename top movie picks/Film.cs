@@ -18,13 +18,13 @@ public class Film
     [Name("movie_id")]
     public string MovieId { get; set; }
     
-    [Name("popularity")] public string PopularityString { private get; set; }
-
+    [Name("popularity")] public string PopularityString { get; set; }
+    [Ignore]
     public double Popularity => PopularityString == "null" ? 0 : double.Parse(PopularityString, CultureInfo.InvariantCulture);
 
 
-    [Name("vote_average")] public string VoteAverageString { private get; set; }
-
+    [Name("vote_average")] public string VoteAverageString { get; set; }
+    [Ignore]
     public double VoteAverage => VoteAverageString == "null" ? 0 : double.Parse(VoteAverageString, CultureInfo.InvariantCulture);
 
     [Name("movie_title")]
