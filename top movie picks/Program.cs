@@ -54,6 +54,10 @@ void Rate(string command)
     var movieName = string.Join(" ", movieNameArr);
     if (!movieByName.ContainsKey(movieName))
     {
+        foreach (var key in movieByName.Keys)
+        {
+            // levenshtein distance
+        }
         Console.WriteLine("looks like we don't know this movie or you made a typo");
         // later we can add there check for typos i guess
         return;
