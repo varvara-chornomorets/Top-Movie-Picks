@@ -45,6 +45,17 @@ public class Film
             .Replace("]", "");
         return replace == "" ? null : replace.Split(',');
     }
+
+    public string Description()
+    {
+        return $"\"{MovieTitle}\"\n" +
+               $"Overview: {Overview}\n" +
+               $"Average vote: {VoteAverage}\n" +
+               $"Released: {ReleaseDate}\n" +
+               $"Genre(s): {string.Join(", ", Genres)}\n" +
+               $"IMDB link: {ImdbLink}\n" +
+               $"TMDB link: {TmdbLink}\n";
+    }
 }
 
 /*
