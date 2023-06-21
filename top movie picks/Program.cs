@@ -35,7 +35,7 @@ while (true)
         Discover(command);
         continue;
     }
-    if (command.Contains("Describe"))
+    if (command.Contains("describe"))
     {
         Describe(command);
         continue;
