@@ -120,4 +120,20 @@ public class User
         }
         
     }
+
+    public Genre GetGenre(genre genre)
+    {
+        return genre switch
+        {
+            genre.drama => drama,
+            genre.comedy => comedy,
+            genre.action => action,
+            genre.romance => romance,
+            genre.fiction => fiction,
+            genre.animation => animation,
+            genre.thriller => thriller,
+            genre.documentary => documentary,
+            _ => throw new ArgumentException("Invalid genre"),
+        };
+    }
 }
