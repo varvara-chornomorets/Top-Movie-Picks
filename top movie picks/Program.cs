@@ -35,6 +35,11 @@ while (true)
         Discover(command);
         continue;
     }
+    if (command.Contains("Describe"))
+    {
+        Describe(command);
+        continue;
+    }
 
     Console.WriteLine(whenCommandIsWrong);
 }
@@ -103,6 +108,11 @@ void Rate(string command)
 void Discover(string command)
 {
     preciousUser.CountCoordinates();
+}
+
+void Describe(string command)
+{
+    Console.WriteLine(movieById[command.Split(' ')[1]].Description());
 }
 
 
