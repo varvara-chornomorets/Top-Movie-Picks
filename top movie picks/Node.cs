@@ -28,29 +28,8 @@ public class Node
         }
     }
 
-    public User[] SortUsers(User[] users)
-    {
-        switch (Genre)
-        {
-            case genre.drama:
-                return users.OrderBy(user => user.drama.average).ToArray();
-            case genre.action:
-                return users.OrderBy(user => user.action.average).ToArray();
-            case genre.animation:
-                return users.OrderBy(user => user.animation.average).ToArray();
-            case genre.documentary:
-                return users.OrderBy(user => user.documentary.average).ToArray();
-            case genre.fiction:
-                return users.OrderBy(user => user.fiction.average).ToArray();
-            case genre.comedy:
-                return users.OrderBy(user => user.comedy.average).ToArray();
-            case genre.romance:
-                return users.OrderBy(user => user.romance.average).ToArray();
-            default:
-            case genre.thriller:
-                return users.OrderBy(user => user.thriller.average).ToArray();
-        }
-    }
+    private User[] SortUsers(User[] users) => 
+        users.OrderBy(user => user.GetGenre(Genre).average).ToArray();
 
     public genre NextGenre(genre genre)
     {

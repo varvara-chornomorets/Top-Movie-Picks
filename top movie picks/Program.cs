@@ -4,6 +4,8 @@ using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
 
+var movieById = new Dictionary<string, Film>();
+
 Console.WriteLine("hello, out precious user! \nlet us prepare real quick :} ");
 (List<User> space, Dictionary<string, Film> movieByName) = Preparation();
 User preciousUser = new User();
@@ -25,7 +27,7 @@ while (true)
 
     if (command.Contains("recommend"))
     {
-        Recommend(command);
+        Recommend();
         continue;
     }
     if (command.Contains("discover"))
@@ -33,13 +35,46 @@ while (true)
         Discover(command);
         continue;
     }
+    if (command.Contains("describe"))
+    {
+        Describe(command);
+        continue;
+    }
 
     Console.WriteLine(whenCommandIsWrong);
 }
 
-void Recommend(string command)
+void Recommend()
 {
-    
+    var kNeighbours = K_dTree.FindNeighbours(preciousUser, 15);
+    var recommendMovies = new Dictionary<string, int>();
+    var watchedMovies = preciousUser.AllMovieIds();
+    foreach (var neighbour in kNeighbours) // through all neighbours...
+    {
+        foreach (var neighbourGenre in neighbour.Genres) // through all genres they like...
+        {
+            if (neighbourGenre.average < 7) continue;
+            foreach (var rating in neighbourGenre.ratings) // and all movies they consider cool...
+            {
+                if (rating.rating_val < 7) continue;
+                var movieId = rating.movie_id;
+                if (watchedMovies.Contains(movieId)) continue;
+                if (recommendMovies.ContainsKey(movieId))
+                    recommendMovies[movieId] += rating.rating_val;
+                else
+                    recommendMovies[movieId] = rating.rating_val;
+            }
+        }
+    } // we choose those that have the biggest ratings sum, regardless of whether it's a few 10s or a lot of 7s...
+
+    var topThreeFilms = recommendMovies
+        .OrderByDescending(kv => kv.Value).Take(3).Select(kv => kv.Key);
+    foreach (var filmId in topThreeFilms)
+    {
+        Console.WriteLine($"Have you watched the movie \"{movieById[filmId]}\"?");
+        Console.WriteLine($"If you want further information about the film, type this: \"Description {filmId}\"");
+        Console.WriteLine();
+    }
 }
 void Rate(string command)
 {
@@ -137,10 +172,14 @@ void Discover(string command)
     preciousUser.CountCoordinates();
 }
 
+void Describe(string command)
+{
+    Console.WriteLine(movieById[command.Split(' ')[1]].Description());
+}
+
 
 (List<User>  users, Dictionary<string, Film> movieNames) Preparation()
 {
-    var movieById = new Dictionary<string, Film>();
     var userByUsername = new Dictionary<string, User>();
     var movieNames = new Dictionary<string, Film>();
 

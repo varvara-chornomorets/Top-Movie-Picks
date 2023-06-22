@@ -76,6 +76,12 @@ public class User
         }
     }
 
+    public double FindDifference(User anotherUser) => Enum.GetValues(typeof(genre)).Cast<genre>()
+        .Sum(genre => Math.Pow(GetGenre(genre).average - anotherUser.GetGenre(genre).average, 2));
+
+    public string[] AllMovieIds() =>
+        (from genre in Genres from rating in genre.ratings select rating.movie_id).ToArray();
+
     public override string ToString()
     {
         return
@@ -119,5 +125,21 @@ public class User
             }
         }
         
+    }
+
+    public Genre GetGenre(genre genre)
+    {
+        return genre switch
+        {
+            genre.drama => drama,
+            genre.comedy => comedy,
+            genre.action => action,
+            genre.romance => romance,
+            genre.fiction => fiction,
+            genre.animation => animation,
+            genre.thriller => thriller,
+            genre.documentary => documentary,
+            _ => throw new ArgumentException("Invalid genre"),
+        };
     }
 }

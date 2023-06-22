@@ -1,4 +1,5 @@
-﻿using CsvHelper.Configuration.Attributes;
+﻿using System.Globalization;
+using CsvHelper.Configuration.Attributes;
 
 public class Film
 {
@@ -17,6 +18,15 @@ public class Film
     [Name("movie_id")]
     public string MovieId { get; set; }
     
+    [Name("popularity")] public string PopularityString { get; set; }
+    [Ignore]
+    public double Popularity => PopularityString == "null" ? 0 : double.Parse(PopularityString, CultureInfo.InvariantCulture);
+
+
+    [Name("vote_average")] public string VoteAverageString { get; set; }
+    [Ignore]
+    public double VoteAverage => VoteAverageString == "null" ? 0 : double.Parse(VoteAverageString, CultureInfo.InvariantCulture);
+
     [Name("movie_title")]
     public string MovieTitle { get; set; }
     
@@ -35,6 +45,17 @@ public class Film
             .Replace("]", "");
         return replace == "" ? null : replace.Split(',');
     }
+
+    public string Description()
+    {
+        return $"\"{MovieTitle}\"\n" +
+               $"Overview: {Overview}\n" +
+               $"Average vote: {VoteAverage}\n" +
+               $"Released: {ReleaseDate}\n" +
+               $"Genre(s): {string.Join(", ", Genres)}\n" +
+               $"IMDB link: {ImdbLink}\n" +
+               $"TMDB link: {TmdbLink}\n";
+    }
 }
 
 /*
@@ -47,14 +68,14 @@ public class Film
     movie_title
 ----original_language
     overview
-----popularity
+    popularity
 -11-production_countries
     release_date
 ----runtime
 ----spoken_languages
 ----tmdb_id
     tmdb_link
-----vote_average
+    vote_average
 ----vote_count
 ----year_released
 
