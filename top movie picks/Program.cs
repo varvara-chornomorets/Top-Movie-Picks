@@ -9,6 +9,7 @@ var movieById = new Dictionary<string, Film>();
 Console.WriteLine("hello, out precious user! \nlet us prepare real quick :} ");
 (List<User> space, Dictionary<string, Film> movieByName) = Preparation();
 User preciousUser = new User();
+var k_dTree = new K_dTree(space.ToArray());
 Console.WriteLine("let the magic begin! firstly, we want to get to know you! so, please, give us your reviews" +
                   "by typing in \n'rate <movie_name> <your rate from 1 to 10>'");
 string whenCommandIsWrong = "we regret to inform you that there is " +
@@ -46,14 +47,15 @@ while (true)
 
 void Recommend()
 {
-    var kNeighbours = K_dTree.FindNeighbours(preciousUser, 15);
+    preciousUser.CountCoordinates();
+    var kNeighbours = k_dTree.FindNeighbours(preciousUser, 3);
     var recommendMovies = new Dictionary<string, int>();
     var watchedMovies = preciousUser.AllMovieIds();
     foreach (var neighbour in kNeighbours) // through all neighbours...
     {
         foreach (var neighbourGenre in neighbour.Genres) // through all genres they like...
         {
-            if (neighbourGenre.average < 7) continue;
+            if (neighbourGenre.average < 0.7) continue;
             foreach (var rating in neighbourGenre.ratings) // and all movies they consider cool...
             {
                 if (rating.rating_val < 7) continue;
@@ -71,8 +73,8 @@ void Recommend()
         .OrderByDescending(kv => kv.Value).Take(3).Select(kv => kv.Key);
     foreach (var filmId in topThreeFilms)
     {
-        Console.WriteLine($"Have you watched the movie \"{movieById[filmId]}\"?");
-        Console.WriteLine($"If you want further information about the film, type this: \"Description {filmId}\"");
+        Console.WriteLine($"Have you watched the movie \"{movieById[filmId].MovieTitle}\"?");
+        Console.WriteLine($"If you want further information about the film, type this: \"description {movieById[filmId].MovieTitle}\"");
         Console.WriteLine();
     }
 }
@@ -174,7 +176,7 @@ void Discover(string command)
 
 void Describe(string command)
 {
-    Console.WriteLine(movieById[command.Split(' ')[1]].Description());
+    Console.WriteLine(movieByName[command.Split(' ')[1]].Description());
 }
 
 
