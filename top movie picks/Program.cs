@@ -54,12 +54,18 @@ void Rate(string command)
     var movieName = string.Join(" ", movieNameArr);
     if (!movieByName.ContainsKey(movieName))
     {
-        foreach (var key in movieByName.Keys)
+        List<string>? bestMatches = FindBestMatches(movieName);
+        if (bestMatches.Count == 0)
         {
-            // levenshtein distance
+            Console.WriteLine("looks like we don't know this movie");
+            return;        
         }
-        Console.WriteLine("looks like we don't know this movie or you made a typo");
-        // later we can add there check for typos i guess
+
+        Console.WriteLine($"Looks like you've made a typo. Maybe instead of {movieName} you meant:");
+        foreach (var option in bestMatches)
+        {
+            Console.WriteLine(option);
+        }
         return;
     }
 
@@ -72,8 +78,60 @@ void Rate(string command)
     };
     preciousUser.AddRating(rating, curMovie.Genres);
     Console.WriteLine("okay, we've got your review, let's continue");
-    Console.WriteLine(preciousUser);
+    // Console.WriteLine(preciousUser);
 }
+
+List<string>? FindBestMatches(string inputMovieName)
+{
+    int possibleDistance = inputMovieName.Length / 5;
+    List<string> bestMatches = new List<string>();
+    foreach (var word in movieByName.Keys)
+    {
+        int distance = LevenshteinDistance(inputMovieName, word);
+        if (distance <= possibleDistance)
+        {
+            bestMatches.Add(word);
+        }
+    }
+    return bestMatches;
+}
+
+int LevenshteinDistance(string original, string candidate)
+{
+    // preparation stage
+    var array = new int[candidate.Length + 1, original.Length + 1];
+    for (int i = 0; i <= candidate.Length; i++)
+    {
+        array[i, 0] = i;
+    }
+
+    for (int j = 0; j <= original.Length; j++)
+    {
+        array[0, j] = j;
+    }
+
+    for (int i = 1; i <= candidate.Length; i++)
+    {
+        for (int j = 1; j <= original.Length; j++)
+        {
+            array[i, j] = Math.Min(Math.Min(array[i - 1, j] + 1, // deletion
+                    array[i, j - 1] + 1), // insertion
+                array[i - 1, j - 1] + IsDifferent(candidate[i - 1], original[j - 1])); //substitution
+            if ((i > 1) && (j > 1) && (candidate[i - 1] == original[j - 2]) && (candidate[i - 2] == original[j - 1]))
+            {
+                array[i, j] = Math.Min(array[i, j], array[i - 2, j - 2] + 1); //transposition
+            }
+        }
+    }
+
+    return array[candidate.Length, original.Length];
+}
+
+int IsDifferent(char first, char second)
+{
+    return first == second ? 0 : 1;
+}
+
 void Discover(string command)
 {
     preciousUser.CountCoordinates();
