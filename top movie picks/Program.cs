@@ -1,21 +1,22 @@
 using System.Collections;
-using System.ComponentModel;
 using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
 
 var movieById = new Dictionary<string, Film>();
 
-Console.WriteLine("hello, out precious user! \nlet us prepare real quick :} ");
-(var space, Dictionary<string, Film> movieByName) = Preparation();
-var preciousUser = new User();
+Console.WriteLine("Hello, our precious user! \nlet us prepare real quick :} ");
+(List<User> space, Dictionary<string, Film> movieByName, List<Film> popularFilms) = Preparation();
+User preciousUser = new User();
 var kDTree = new K_dTree(space.ToArray());
 Console.WriteLine("Let the magic begin! Firstly, we want to get to know you! So, please, give us your reviews " +
-                  "by typing in \n'rate <movie_name> <your rate from 1 to 10>'");
+                  "by typing in \nrate <movie_name> <your rate from 1 to 10>");
 const string whenCommandIsWrong = "We regret to inform you that there is " +
-                                  "no such command. \navailable commands are: " +
-                                  "rate <movie_name> <your rate from 1 to 10>" +
-                                  "\n discover";
+                                 "no such command. \navailable commands are: " +
+                                 "rate <movie_name> <your rate from 1 to 10>" +
+                                 "\nrecommend" +
+                                 "\ndiscover" +
+                                 "\ndescribe <movie_name>";
 
 while (true)
 {
@@ -89,7 +90,7 @@ void Rate(string command)
     var ratingVal = commandArr[^1];
     if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
     {
-        Console.WriteLine("Looks like your rate is not valid");
+        Console.WriteLine("Looks like your rate is not valid.");
         return;
     }
     var movieNameArr = commandArr[1..^1];
@@ -119,7 +120,7 @@ void Rate(string command)
         movie_id = curMovie.MovieId
     };
     preciousUser.AddRating(rating, curMovie.Genres);
-    Console.WriteLine("okay, we've got your review, let's continue");
+    Console.WriteLine("Okay, we've got your review, let's continue");
 }
 
 List<string>? FindBestMatches(string inputMovieName)
@@ -175,7 +176,75 @@ int IsDifferent(char first, char second)
 
 void Discover(string command)
 {
-    preciousUser.CountCoordinates();
+    Console.WriteLine("Welcome to discover! Here we will ask your opinion about some movies, and then we will give you recommendations." +
+                      "\nIf you feel bored during this process - type in 'stop' or 'exit' and we will stop.");
+    int proposed = 0;
+    int added = 0;
+    while (true)
+    {
+        var curFilm = popularFilms[0];
+        Console.WriteLine($"Have you seen {curFilm.MovieTitle}? Yes/No ");
+        string answer = Console.ReadLine();
+        if (answer is "Exit" or "exit" or "stop" or "e" or "Stop" or "STOP")
+        {
+            Console.WriteLine("You decided to stop 'discover'.");
+            break;
+        }
+        else if (answer is "Y" or "Yes" or "yes" or "yeah" or "YES")
+        {
+            while (true)
+            {
+                Console.WriteLine($"What is your rate of this movie ({curFilm.MovieTitle}) from 1 to 10?");
+                string ratingVal = Console.ReadLine();
+                if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
+                {
+                    Console.WriteLine("Looks like your rate is not valid");
+                    continue;
+                }
+
+                if (intRatingVal is > 10 or < 1)
+                {
+                    Console.WriteLine("Looks like you rate is not valid. Please use numbers from 1 to 10");
+                    continue;
+                }
+
+                Rating rating = new Rating()
+                {
+                    rating_val = intRatingVal,
+                    movie_id = curFilm.MovieId
+                };
+                preciousUser.AddRating(rating, curFilm.Genres);
+                added++;
+                proposed++;
+                popularFilms.Remove(curFilm);
+                break;
+            }
+            
+        }
+
+        else if (answer is "N" or "No" or "no" or "nope" or "NO")
+        {
+            popularFilms.Remove(curFilm);
+            proposed++;
+        }
+        else
+        {
+            Console.WriteLine("Sorry, we didn't get what you mean. Please type in 'Yes' or 'No'");
+        }
+
+        if (added == 7)
+        {
+            Console.WriteLine("Good job. Now we are ready to give you recommendations");
+            Recommend();
+            break;
+        }
+
+        if (proposed == 100)
+        {
+            Console.WriteLine("Looks like our discover doesn't really work for you. You had better try using command 'rate' instead. " +
+                              "We are closing the discover mode, sorry.");
+        }
+    }
 }
 
 void Describe(string command)
@@ -196,10 +265,11 @@ void Describe(string command)
 }
 
 
-(List<User>  users, Dictionary<string, Film> movieNames) Preparation()
+(List<User>  users, Dictionary<string, Film> movieNames, List<Film> popularFilms) Preparation()
 {
     var userByUsername = new Dictionary<string, User>();
     var movieNames = new Dictionary<string, Film>();
+    var popularMovies = new List<Film>();
 
     var movies = ReadFilms();
     Console.WriteLine("Movies picked! ");
@@ -209,6 +279,13 @@ void Describe(string command)
         movieById[movie.MovieId] = movie;
         movieNames[movie.MovieTitle] = movie;
     }
+    movies = movies.OrderByDescending(m => m.Popularity).ToList();
+    popularMovies.AddRange(movies.Where(movie => movie.VoteAverage > 8).Take(1000));
+    
+    // foreach (var movie in popularMovies)
+    // {
+    //     Console.WriteLine(movie.MovieTitle);
+    // }
         
 
     var users = ReadUserCsv();
@@ -225,7 +302,7 @@ void Describe(string command)
     Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
 
     CreateSpace(users);
-    return (users, movieNames);
+    return (users, movieNames, popularMovies);
 }
 
 List<Film> ReadFilms()
