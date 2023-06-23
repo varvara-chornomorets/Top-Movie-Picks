@@ -1,5 +1,4 @@
 using System.Collections;
-using System.ComponentModel;
 using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
@@ -7,14 +6,15 @@ using top_movie_picks;
 var movieById = new Dictionary<string, Film>();
 
 Console.WriteLine("hello, out precious user! \nlet us prepare real quick :} ");
-(List<User> space, Dictionary<string, Film> movieByName) = Preparation();
+(List<User> space, Dictionary<string, Film> movieByName, List<Film> popularFilms) = Preparation();
 User preciousUser = new User();
-Console.WriteLine("let the magic begin! firstly, we want to get to know you! so, please, give us your reviews" +
-                  "by typing in \n'rate <movie_name> <your rate from 1 to 10>'");
+Console.WriteLine("let the magic begin! firstly, we want to get to know you! so, please, give us your reviews " +
+                  "by typing in \nrate <movie_name> <your rate from 1 to 10>");
 string whenCommandIsWrong = "we regret to inform you that there is " +
                             "no such command. \navailable commands are: " +
                             "rate <movie_name> <your rate from 1 to 10>" +
-                            "\n discover";
+                            "\nrecommend" +
+                            "\ndiscover";
 
 while (true)
 {
@@ -169,7 +169,35 @@ int IsDifferent(char first, char second)
 
 void Discover(string command)
 {
-    preciousUser.CountCoordinates();
+    int proposed = 0;
+    int added = 0;
+    while (true)
+    {
+        var curFilm = popularFilms[0];
+        Console.WriteLine($"Have you seen {curFilm.MovieTitle}? Y/N ");
+        string answer = Console.ReadLine();
+        if (answer == "Y")
+        {
+            Console.WriteLine("what is your rate of this movie from 1 to 10?");
+            string ratingVal = Console.ReadLine();
+            if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
+            {
+                Console.WriteLine("looks like your rate is not valid");
+                return;
+            }
+
+            if (intRatingVal is > 10 or < 1)
+            {
+                Console.WriteLine("looks like you rate is not valid. pl");
+            }
+
+            Rating rating = new Rating()
+            {
+                rating_val = intRatingVal,
+                movie_id = curFilm.MovieId
+            };
+        }
+    }
 }
 
 void Describe(string command)
@@ -178,10 +206,11 @@ void Describe(string command)
 }
 
 
-(List<User>  users, Dictionary<string, Film> movieNames) Preparation()
+(List<User>  users, Dictionary<string, Film> movieNames, List<Film> popularFilms) Preparation()
 {
     var userByUsername = new Dictionary<string, User>();
     var movieNames = new Dictionary<string, Film>();
+    var popularMovies = new List<Film>();
 
     var movies = ReadFilms();
     Console.WriteLine("Movies picked! ");
@@ -190,6 +219,13 @@ void Describe(string command)
     {
         movieById[movie.MovieId] = movie;
         movieNames[movie.MovieTitle] = movie;
+    }
+    movies = movies.OrderByDescending(m => m.Popularity).ToList();
+    popularMovies.AddRange(movies.Where(movie => movie.VoteAverage > 8).Take(1000));
+    
+    foreach (var movie in popularMovies)
+    {
+        Console.WriteLine(movie.MovieTitle);
     }
         
 
@@ -207,7 +243,7 @@ void Describe(string command)
     Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
 
     CreateSpace(users);
-    return (users, movieNames);
+    return (users, movieNames, popularMovies);
 }
 
 List<Film> ReadFilms()
