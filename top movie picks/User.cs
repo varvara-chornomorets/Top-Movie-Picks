@@ -56,7 +56,7 @@ public class User
         {
             if (genre.ratings.Count == 0)
             {
-                genre.average = 0;
+                genre.average = 5.5;
                 continue;
             }
 

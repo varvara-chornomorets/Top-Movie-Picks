@@ -26,16 +26,16 @@ public class K_dTree
             var genre = currentNode.Genre;
             var nodeUser = currentNode.Value;
             var neighbours = new List<User>();
-            var notFarOnLeft = user.GetGenre(genre).average - range < nodeUser.GetGenre(genre).average;
-            var notFarOnRight = user.GetGenre(genre).average + range > nodeUser.GetGenre(genre).average;
-            if (notFarOnLeft && notFarOnRight)
+            var nodeIsNotFarSmaller = user.GetGenre(genre).average - range < nodeUser.GetGenre(genre).average;
+            var nodeIsNotFarBigger = user.GetGenre(genre).average + range > nodeUser.GetGenre(genre).average;
+            if (nodeIsNotFarBigger && nodeIsNotFarSmaller)
             {
                 neighbours.Add(nodeUser);
-                if (currentNode.Left != null) LocalFindNeighbours(currentNode.Left, range, user);
-                if (currentNode.Right != null) LocalFindNeighbours(currentNode.Right, range, user);
+                if (currentNode.Left != null) neighbours.AddRange(LocalFindNeighbours(currentNode.Left, range, user));
+                if (currentNode.Right != null) neighbours.AddRange(LocalFindNeighbours(currentNode.Right, range, user));
             }
-            else if (notFarOnLeft && currentNode.Right != null) LocalFindNeighbours(currentNode.Right, range, user);
-            else if (notFarOnRight && currentNode.Left != null) LocalFindNeighbours(currentNode.Left, range, user);
+            else if (nodeIsNotFarBigger && currentNode.Left != null) neighbours.AddRange(LocalFindNeighbours(currentNode.Left, range, user));
+            else if (nodeIsNotFarSmaller && currentNode.Right != null) neighbours.AddRange(LocalFindNeighbours(currentNode.Right, range, user));
             return neighbours.ToArray();
         }
     }

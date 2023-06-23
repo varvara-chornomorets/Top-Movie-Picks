@@ -48,14 +48,14 @@ while (true)
 void Recommend()
 {
     preciousUser.CountCoordinates();
-    var kNeighbours = k_dTree.FindNeighbours(preciousUser, 3);
+    var kNeighbours = k_dTree.FindNeighbours(preciousUser, 15);
     var recommendMovies = new Dictionary<string, int>();
     var watchedMovies = preciousUser.AllMovieIds();
     foreach (var neighbour in kNeighbours) // through all neighbours...
     {
         foreach (var neighbourGenre in neighbour.Genres) // through all genres they like...
         {
-            if (neighbourGenre.average < 0.7) continue;
+            if (neighbourGenre.average < 0.5) continue;
             foreach (var rating in neighbourGenre.ratings) // and all movies they consider cool...
             {
                 if (rating.rating_val < 7) continue;
@@ -74,7 +74,7 @@ void Recommend()
     foreach (var filmId in topThreeFilms)
     {
         Console.WriteLine($"Have you watched the movie \"{movieById[filmId].MovieTitle}\"?");
-        Console.WriteLine($"If you want further information about the film, type this: \"description {movieById[filmId].MovieTitle}\"");
+        Console.WriteLine($"If you want further information about the film, type this: \"describe {movieById[filmId].MovieTitle}\"");
         Console.WriteLine();
     }
 }
@@ -176,7 +176,13 @@ void Discover(string command)
 
 void Describe(string command)
 {
-    Console.WriteLine(movieByName[command.Split(' ')[1]].Description());
+    var name = command[9..];
+    if (movieByName.ContainsKey(name))
+    {
+        Console.WriteLine(movieByName[name].Description());
+        return;
+    }
+    Console.WriteLine("Sorry, maybe you meant *Levenshtein*?");
 }
 
 
