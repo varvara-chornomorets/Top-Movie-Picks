@@ -5,9 +5,10 @@ using top_movie_picks;
 
 var movieById = new Dictionary<string, Film>();
 
-Console.WriteLine("Hello, out precious user! \nlet us prepare real quick :} ");
+Console.WriteLine("Hello, out precious user! \nLet us prepare real quick :} ");
 (List<User> space, Dictionary<string, Film> movieByName, List<Film> popularFilms) = Preparation();
 User preciousUser = new User();
+var kDTree = new K_dTree(space.ToArray());
 Console.WriteLine("Let the magic begin! Firstly, we want to get to know you! So, please, give us your reviews " +
                   "by typing in \nrate <movie_name> <your rate from 1 to 10>");
 string whenCommandIsWrong = "We regret to inform you that there is " +
