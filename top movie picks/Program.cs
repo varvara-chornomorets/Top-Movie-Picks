@@ -182,7 +182,15 @@ void Describe(string command)
         Console.WriteLine(movieByName[name].Description());
         return;
     }
-    Console.WriteLine("Sorry, maybe you meant *Levenshtein*?");
+
+    var similarMovies = movieByName.Keys.OrderBy(key => LevenshteinDistance(name, key)).Take(3).ToArray();
+
+    Console.WriteLine("Sorry, we don't know what you meant, but here we have some possible options: ");
+
+    foreach (var movieName in similarMovies)
+    {
+        Console.WriteLine(movieName);
+    }
 }
 
 
