@@ -5,18 +5,18 @@ using top_movie_picks;
 
 var movieById = new Dictionary<string, Film>();
 
-Console.WriteLine("Hello, our precious user! \nlet us prepare real quick :} ");
+Console.WriteLine("Hello, out precious user! \nLet us prepare real quick :} ");
 (List<User> space, Dictionary<string, Film> movieByName, List<Film> popularFilms) = Preparation();
 User preciousUser = new User();
 var kDTree = new K_dTree(space.ToArray());
 Console.WriteLine("Let the magic begin! Firstly, we want to get to know you! So, please, give us your reviews " +
                   "by typing in \nrate <movie_name> <your rate from 1 to 10>");
-const string whenCommandIsWrong = "We regret to inform you that there is " +
-                                 "no such command. \navailable commands are: " +
-                                 "rate <movie_name> <your rate from 1 to 10>" +
-                                 "\nrecommend" +
-                                 "\ndiscover" +
-                                 "\ndescribe <movie_name>";
+string whenCommandIsWrong = "We regret to inform you that there is " +
+                            "no such command. \navailable commands are: " +
+                            "rate <movie_name> <your rate from 1 to 10>" +
+                            "\nrecommend" +
+                            "\ndiscover" +
+                            "\ndescribe <movie_name>";
 
 while (true)
 {
@@ -121,6 +121,7 @@ void Rate(string command)
     };
     preciousUser.AddRating(rating, curMovie.Genres);
     Console.WriteLine("Okay, we've got your review, let's continue");
+    // Console.WriteLine(preciousUser);
 }
 
 List<string>? FindBestMatches(string inputMovieName)
