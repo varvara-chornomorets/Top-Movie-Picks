@@ -5,12 +5,12 @@ using top_movie_picks;
 
 var movieById = new Dictionary<string, Film>();
 
-Console.WriteLine("hello, out precious user! \nlet us prepare real quick :} ");
+Console.WriteLine("Hello, out precious user! \nlet us prepare real quick :} ");
 (List<User> space, Dictionary<string, Film> movieByName, List<Film> popularFilms) = Preparation();
 User preciousUser = new User();
-Console.WriteLine("let the magic begin! firstly, we want to get to know you! so, please, give us your reviews " +
+Console.WriteLine("Let the magic begin! Firstly, we want to get to know you! So, please, give us your reviews " +
                   "by typing in \nrate <movie_name> <your rate from 1 to 10>");
-string whenCommandIsWrong = "we regret to inform you that there is " +
+string whenCommandIsWrong = "We regret to inform you that there is " +
                             "no such command. \navailable commands are: " +
                             "rate <movie_name> <your rate from 1 to 10>" +
                             "\nrecommend" +
@@ -83,7 +83,7 @@ void Rate(string command)
     var ratingVal = commandArr[^1];
     if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
     {
-        Console.WriteLine("looks like your rate is not valid");
+        Console.WriteLine("Looks like your rate is not valid.");
         return;
     }
     var movieNameArr = commandArr[1..^1];
@@ -93,7 +93,7 @@ void Rate(string command)
         List<string>? bestMatches = FindBestMatches(movieName);
         if (bestMatches.Count == 0)
         {
-            Console.WriteLine("looks like we don't know this movie");
+            Console.WriteLine("Looks like we don't know this movie");
             return;        
         }
 
@@ -113,7 +113,7 @@ void Rate(string command)
         movie_id = curMovie.MovieId
     };
     preciousUser.AddRating(rating, curMovie.Genres);
-    Console.WriteLine("okay, we've got your review, let's continue");
+    Console.WriteLine("Okay, we've got your review, let's continue");
     // Console.WriteLine(preciousUser);
 }
 
@@ -264,10 +264,10 @@ void Describe(string command)
     movies = movies.OrderByDescending(m => m.Popularity).ToList();
     popularMovies.AddRange(movies.Where(movie => movie.VoteAverage > 8).Take(1000));
     
-    foreach (var movie in popularMovies)
-    {
-        Console.WriteLine(movie.MovieTitle);
-    }
+    // foreach (var movie in popularMovies)
+    // {
+    //     Console.WriteLine(movie.MovieTitle);
+    // }
         
 
     var users = ReadUserCsv();
