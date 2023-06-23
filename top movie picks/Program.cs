@@ -55,7 +55,7 @@ while (true)
     }
     if (command.Contains("discover"))
     {
-        Discover(command);
+        Discover();
         continue;
     }
     if (command.Contains("describe"))
@@ -160,7 +160,7 @@ void Rate(string command)
 List<string>? FindBestMatches(string inputMovieName)
 {
     var possibleDistance = inputMovieName.Length / 5;
-    List<string> bestMatches = new List<string>();
+    var bestMatches = new List<string>();
     foreach (var word in movieByName.Keys)
     {
         var distance = LevenshteinDistance(inputMovieName, word);
@@ -208,41 +208,37 @@ int IsDifferent(char first, char second)
     return first == second ? 0 : 1;
 }
 
-void Discover(string command)
+void Discover()
 {
     Console.WriteLine("Welcome to discover! Here we will ask your opinion about some movies, and then we will give you recommendations." +
                       "\nIf you feel bored during this process - type in 'stop' or 'exit' and we will stop.");
-    int proposed = 0;
-    int added = 0;
+    var proposed = 0;
+    var added = 0;
     while (true)
     {
         var curFilm = popularFilms[0];
         Console.WriteLine($"Have you seen {curFilm.MovieTitle}? Yes/No ");
-        string answer = Console.ReadLine();
-        if (answer is "Exit" or "exit" or "stop" or "e" or "Stop" or "STOP")
+        var answer = Console.ReadLine();
+        if (answer == null) continue;
+        if (char.ToLower(answer[0]) is 's' or 'e') // stop / exit
         {
             Console.WriteLine("You decided to stop 'discover'.");
             break;
         }
-        else if (answer is "Y" or "Yes" or "yes" or "yeah" or "YES")
+
+        if (char.ToLower(answer[0]) == 'y') // yes
         {
             while (true)
             {
                 Console.WriteLine($"What is your rate of this movie ({curFilm.MovieTitle}) from 1 to 10?");
-                string ratingVal = Console.ReadLine();
+                var ratingVal = Console.ReadLine();
                 if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
                 {
                     Console.WriteLine("Looks like your rate is not valid");
                     continue;
                 }
 
-                if (intRatingVal is > 10 or < 1)
-                {
-                    Console.WriteLine("Looks like you rate is not valid. Please use numbers from 1 to 10");
-                    continue;
-                }
-
-                Rating rating = new Rating()
+                var rating = new Rating()
                 {
                     rating_val = intRatingVal,
                     movie_id = curFilm.MovieId
@@ -256,7 +252,7 @@ void Discover(string command)
             
         }
 
-        else if (answer is "N" or "No" or "no" or "nope" or "NO")
+        else if (char.ToLower(answer[0]) == 'y') // nope
         {
             popularFilms.Remove(curFilm);
             proposed++;

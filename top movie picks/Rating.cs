@@ -19,7 +19,7 @@ public class Rating
             return false;
         }
 
-        Rating other = (Rating)obj;
+        var other = (Rating)obj;
 
         return movie_id == other.movie_id &&
                rating_val == other.rating_val &&
