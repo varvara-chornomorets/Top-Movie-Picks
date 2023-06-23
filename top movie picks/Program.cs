@@ -14,7 +14,8 @@ string whenCommandIsWrong = "we regret to inform you that there is " +
                             "no such command. \navailable commands are: " +
                             "rate <movie_name> <your rate from 1 to 10>" +
                             "\nrecommend" +
-                            "\ndiscover";
+                            "\ndiscover" +
+                            "\ndescribe <movie_name>";
 
 while (true)
 {
@@ -169,33 +170,73 @@ int IsDifferent(char first, char second)
 
 void Discover(string command)
 {
+    Console.WriteLine("Welcome to discover! Here we will ask your opinion about some movies, and then we will give you recommendations." +
+                      "\nIf you feel bored during this process - type in 'stop' or 'exit' and we will stop.");
     int proposed = 0;
     int added = 0;
     while (true)
     {
         var curFilm = popularFilms[0];
-        Console.WriteLine($"Have you seen {curFilm.MovieTitle}? Y/N ");
+        Console.WriteLine($"Have you seen {curFilm.MovieTitle}? Yes/No ");
         string answer = Console.ReadLine();
-        if (answer == "Y")
+        if (answer is "Exit" or "exit" or "stop" or "e" or "Stop" or "STOP")
         {
-            Console.WriteLine("what is your rate of this movie from 1 to 10?");
-            string ratingVal = Console.ReadLine();
-            if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
+            Console.WriteLine("You decided to stop 'discover'.");
+            break;
+        }
+        else if (answer is "Y" or "Yes" or "yes" or "yeah" or "YES")
+        {
+            while (true)
             {
-                Console.WriteLine("looks like your rate is not valid");
-                return;
-            }
+                Console.WriteLine($"What is your rate of this movie ({curFilm.MovieTitle}) from 1 to 10?");
+                string ratingVal = Console.ReadLine();
+                if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
+                {
+                    Console.WriteLine("Looks like your rate is not valid");
+                    continue;
+                }
 
-            if (intRatingVal is > 10 or < 1)
-            {
-                Console.WriteLine("looks like you rate is not valid. pl");
-            }
+                if (intRatingVal is > 10 or < 1)
+                {
+                    Console.WriteLine("Looks like you rate is not valid. Please use numbers from 1 to 10");
+                    continue;
+                }
 
-            Rating rating = new Rating()
-            {
-                rating_val = intRatingVal,
-                movie_id = curFilm.MovieId
-            };
+                Rating rating = new Rating()
+                {
+                    rating_val = intRatingVal,
+                    movie_id = curFilm.MovieId
+                };
+                preciousUser.AddRating(rating, curFilm.Genres);
+                added++;
+                proposed++;
+                popularFilms.Remove(curFilm);
+                break;
+            }
+            
+        }
+
+        else if (answer is "N" or "No" or "no" or "nope" or "NO")
+        {
+            popularFilms.Remove(curFilm);
+            proposed++;
+        }
+        else
+        {
+            Console.WriteLine("Sorry, we didn't get what you mean. Please type in 'Yes' or 'No'");
+        }
+
+        if (added == 7)
+        {
+            Console.WriteLine("Good job. Now we are ready to give you recommendations");
+            Recommend();
+            break;
+        }
+
+        if (proposed == 100)
+        {
+            Console.WriteLine("Looks like our discover doesn't really work for you. You had better try using command 'rate' instead. " +
+                              "We are closing the discover mode, sorry.");
         }
     }
 }
