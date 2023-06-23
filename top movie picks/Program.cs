@@ -6,17 +6,34 @@ using top_movie_picks;
 var movieById = new Dictionary<string, Film>();
 
 Console.WriteLine("Hello, out precious user! \nLet us prepare real quick :} ");
-(List<User> space, Dictionary<string, Film> movieByName, List<Film> popularFilms) = Preparation();
-User preciousUser = new User();
+var (space, movieByName, popularFilms) = Preparation();
+var preciousUser = new User();
 var kDTree = new K_dTree(space.ToArray());
-Console.WriteLine("Let the magic begin! Firstly, we want to get to know you! So, please, give us your reviews " +
-                  "by typing in \nrate <movie_name> <your rate from 1 to 10>");
-string whenCommandIsWrong = "We regret to inform you that there is " +
-                            "no such command. \navailable commands are: " +
-                            "rate <movie_name> <your rate from 1 to 10>" +
-                            "\nrecommend" +
-                            "\ndiscover" +
-                            "\ndescribe <movie_name>";
+Console.WriteLine("\nFirstly, let us introduce ourselves." +
+                  "\nWe want to help you choose the best movie to watch. In order to do this we'll collect your reviews ," +
+                  " and then we will give you recommendations. " +
+                  "\n" +
+                  "\nHere are available commands:" +
+                  "\n1. rate <movie_name> <your rate from 1 to 10>+" +
+                  "\nWith the help of this command you can give your review on some movie." +
+                  "\n2. recommend" +
+                  "\nUse this command to see our recommendations for you." + 
+                  "\n3. discover" +
+                  "\nIf you can't remember movies you watched - try this command. You wouldn't need to" +
+                  " think a lot - just say Yes/No and your rate" +
+                  "\n4.describe <movie_name>" +
+                  "\nThis command can provide you with text-based trailer for the movie." +
+                  "\n5.HELP" +
+                  "\nIf you are lost, we are here to repeat everything as many times as you need." +
+                  "\n" +
+                  "\nWe hope you will have a good time. Let the magic begin!"
+);
+const string whenCommandIsWrong = "We regret to inform you that there is " +
+                                  "no such command. available commands are: " +
+                                  "\nrate <movie_name> <your rate from 1 to 10>" +
+                                  "\nrecommend" +
+                                  "\ndiscover" +
+                                  "\ndescribe <movie_name>";
 
 while (true)
 {
@@ -45,6 +62,22 @@ while (true)
     {
         Describe(command);
         continue;
+    }
+
+    if (command.Contains("HELP"))
+    {
+        Console.WriteLine("\nHere are available commands:" +
+        "\n1. rate <movie_name> <your rate from 1 to 10>+" +
+            "\nWith the help of this command you can give your review on some movie." +
+            "\n2. recommend" +
+            "\nUse this command to see our recommendations for you." + 
+            "\n3. discover" +
+            "\nIf you can't remember movies you watched - try this command. You wouldn't need to" +
+            " think a lot - just say Yes/No and your rate" +
+            "\n4.describe <movie_name>" +
+            "\nThis command can provide you with text-based trailer for the movie." +
+            "\n5.HELP" +
+            "\nIf you are lost, we are here to repeat everything as many times as you need.");
     }
 
     Console.WriteLine(whenCommandIsWrong);
