@@ -94,7 +94,7 @@ public class User
             $"{username} -- {num_reviews}: {drama} - {comedy} - {action} - {romance} - {fiction} - {animation} - {thriller} - {documentary}";
     }
 
-    public void AddRating(Rating rating, string[] genres)
+    public void AddRating(Rating rating, string[]? genres)
     {
         if (genres.Length == 0)
         {

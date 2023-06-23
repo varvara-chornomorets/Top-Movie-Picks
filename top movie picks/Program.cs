@@ -7,19 +7,23 @@ using top_movie_picks;
 var movieById = new Dictionary<string, Film>();
 
 Console.WriteLine("hello, out precious user! \nlet us prepare real quick :} ");
-(List<User> space, Dictionary<string, Film> movieByName) = Preparation();
-User preciousUser = new User();
-var k_dTree = new K_dTree(space.ToArray());
-Console.WriteLine("let the magic begin! firstly, we want to get to know you! so, please, give us your reviews" +
+(var space, Dictionary<string, Film> movieByName) = Preparation();
+var preciousUser = new User();
+var kDTree = new K_dTree(space.ToArray());
+Console.WriteLine("Let the magic begin! Firstly, we want to get to know you! So, please, give us your reviews " +
                   "by typing in \n'rate <movie_name> <your rate from 1 to 10>'");
-string whenCommandIsWrong = "we regret to inform you that there is " +
-                            "no such command. \navailable commands are: " +
-                            "rate <movie_name> <your rate from 1 to 10>" +
-                            "\n discover";
+const string whenCommandIsWrong = "We regret to inform you that there is " +
+                                  "no such command. \navailable commands are: " +
+                                  "rate <movie_name> <your rate from 1 to 10>" +
+                                  "\n discover";
 
 while (true)
 {
-    string command = Console.ReadLine();
+    var command = Console.ReadLine();
+    if (command == null)
+    {
+        continue;
+    }
     if (command.Contains("rate"))
     {
         Rate(command);
@@ -48,7 +52,7 @@ while (true)
 void Recommend()
 {
     preciousUser.CountCoordinates();
-    var kNeighbours = k_dTree.FindNeighbours(preciousUser, 15);
+    var kNeighbours = kDTree.FindNeighbours(preciousUser, 15);
     var recommendMovies = new Dictionary<string, int>();
     var watchedMovies = preciousUser.AllMovieIds();
     foreach (var neighbour in kNeighbours) // through all neighbours...
@@ -78,36 +82,37 @@ void Recommend()
         Console.WriteLine();
     }
 }
+
 void Rate(string command)
 {
     var commandArr = command.Split(" ");
     var ratingVal = commandArr[^1];
     if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
     {
-        Console.WriteLine("looks like your rate is not valid");
+        Console.WriteLine("Looks like your rate is not valid");
         return;
     }
     var movieNameArr = commandArr[1..^1];
     var movieName = string.Join(" ", movieNameArr);
     if (!movieByName.ContainsKey(movieName))
     {
-        List<string>? bestMatches = FindBestMatches(movieName);
-        if (bestMatches.Count == 0)
-        {
-            Console.WriteLine("looks like we don't know this movie");
-            return;        
-        }
+        var similarMovies = movieByName.Keys.OrderBy(key => LevenshteinDistance(movieName, key)).Take(3).ToArray();
 
         Console.WriteLine($"Looks like you've made a typo. Maybe instead of {movieName} you meant:");
-        foreach (var option in bestMatches)
-        {
+
+        foreach (var option in similarMovies)
             Console.WriteLine(option);
-        }
+
         return;
     }
 
-    Film curMovie = movieByName[movieName];
-    // i haven't done it yet, but we need to check if user gives us new review, or just repeats itself
+    var curMovie = movieByName[movieName];
+    if (preciousUser.AllMovieIds().Contains(curMovie.MovieId))
+    {
+        Console.WriteLine("Sorry, you've already rated the movie.");
+        Console.WriteLine();
+        return;
+    }
     var rating = new Rating
     {
         rating_val = intRatingVal,
@@ -115,16 +120,15 @@ void Rate(string command)
     };
     preciousUser.AddRating(rating, curMovie.Genres);
     Console.WriteLine("okay, we've got your review, let's continue");
-    // Console.WriteLine(preciousUser);
 }
 
 List<string>? FindBestMatches(string inputMovieName)
 {
-    int possibleDistance = inputMovieName.Length / 5;
+    var possibleDistance = inputMovieName.Length / 5;
     List<string> bestMatches = new List<string>();
     foreach (var word in movieByName.Keys)
     {
-        int distance = LevenshteinDistance(inputMovieName, word);
+        var distance = LevenshteinDistance(inputMovieName, word);
         if (distance <= possibleDistance)
         {
             bestMatches.Add(word);
@@ -137,19 +141,19 @@ int LevenshteinDistance(string original, string candidate)
 {
     // preparation stage
     var array = new int[candidate.Length + 1, original.Length + 1];
-    for (int i = 0; i <= candidate.Length; i++)
+    for (var i = 0; i <= candidate.Length; i++)
     {
         array[i, 0] = i;
     }
 
-    for (int j = 0; j <= original.Length; j++)
+    for (var j = 0; j <= original.Length; j++)
     {
         array[0, j] = j;
     }
 
-    for (int i = 1; i <= candidate.Length; i++)
+    for (var i = 1; i <= candidate.Length; i++)
     {
-        for (int j = 1; j <= original.Length; j++)
+        for (var j = 1; j <= original.Length; j++)
         {
             array[i, j] = Math.Min(Math.Min(array[i - 1, j] + 1, // deletion
                     array[i, j - 1] + 1), // insertion
@@ -177,9 +181,9 @@ void Discover(string command)
 void Describe(string command)
 {
     var name = command[9..];
-    if (movieByName.ContainsKey(name))
+    if (movieByName.TryGetValue(name, out var value))
     {
-        Console.WriteLine(movieByName[name].Description());
+        Console.WriteLine(value.Description());
         return;
     }
 
@@ -188,9 +192,7 @@ void Describe(string command)
     Console.WriteLine("Sorry, we don't know what you meant, but here we have some possible options: ");
 
     foreach (var movieName in similarMovies)
-    {
         Console.WriteLine(movieName);
-    }
 }
 
 
@@ -217,7 +219,7 @@ void Describe(string command)
     Console.WriteLine("Users picked! ");
     Console.WriteLine("Working on reviews... ");
 
-    AddReviewsToUsers(userByUsername, movieById); 
+    AddReviewsToUsers(userByUsername); 
     Console.WriteLine("Reviews added! ");
 
     Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
@@ -252,7 +254,7 @@ List<Film> ReadFilms()
             try
             {
                 var film = csv.GetRecord<Film>();
-                if (film.Genres == null) continue;
+                if (film!.Genres == null) continue;
                 if (film.Genres.Contains("Drama") || film.Genres.Contains("Comedy") ||
                     film.Genres.Contains("Documentary") || film.Genres.Contains("Thriller") ||
                     film.Genres.Contains("Romance") || film.Genres.Contains("Action") ||
@@ -284,12 +286,12 @@ List<User> ReadUserCsv()
     while (csv.Read())
     {
         var user = csv.GetRecord<User>();
-        records.Add(user);
+        records.Add(user!);
     }
     return records;
 }
 
-void AddReviewsToUsers(Dictionary<string, User> userByUsername, Dictionary<string, Film> movieById)
+void AddReviewsToUsers(Dictionary<string, User> userByUsername)
 {
     const string moviePath1 = "ratings_export.csv";
     const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\ratings_export.csv";
@@ -302,11 +304,11 @@ void AddReviewsToUsers(Dictionary<string, User> userByUsername, Dictionary<strin
         while (csv.Read())
         {
             var record = csv.GetRecord<Rating>();
-            if (!userByUsername.ContainsKey(record.user_id)) continue;
+            if (!userByUsername.ContainsKey(record!.user_id)) continue;
             var curUser = userByUsername[record.user_id];
             var curMovie = record.movie_id;
             if (!movieById.ContainsKey(curMovie)) continue;
-            string[] genres = movieById[curMovie].Genres;
+            var genres = movieById[curMovie].Genres;
             curUser.AddRating(record, genres);
         }
     }
@@ -323,9 +325,7 @@ int DeleteUsersWithoutReviews(List<User> users)
     }
 
     foreach (var user in usersToDelete)
-    {
         users.Remove(user);
-    }
 
     return counter;
 }
@@ -333,9 +333,7 @@ int DeleteUsersWithoutReviews(List<User> users)
 void CreateSpace(List<User> users)
 {
     foreach (var variableUser in users)
-    {
         variableUser.CountCoordinates();
-    }
 }
 
 
