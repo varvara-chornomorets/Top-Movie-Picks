@@ -19,7 +19,11 @@ string whenCommandIsWrong = "We regret to inform you that there is " +
 
 while (true)
 {
-    string command = Console.ReadLine();
+    var command = Console.ReadLine();
+    if (command == null)
+    {
+        continue;
+    }
     if (command.Contains("rate"))
     {
         Rate(command);
@@ -47,14 +51,15 @@ while (true)
 
 void Recommend()
 {
-    var kNeighbours = K_dTree.FindNeighbours(preciousUser, 15);
+    preciousUser.CountCoordinates();
+    var kNeighbours = kDTree.FindNeighbours(preciousUser, 15);
     var recommendMovies = new Dictionary<string, int>();
     var watchedMovies = preciousUser.AllMovieIds();
     foreach (var neighbour in kNeighbours) // through all neighbours...
     {
         foreach (var neighbourGenre in neighbour.Genres) // through all genres they like...
         {
-            if (neighbourGenre.average < 7) continue;
+            if (neighbourGenre.average < 0.5) continue;
             foreach (var rating in neighbourGenre.ratings) // and all movies they consider cool...
             {
                 if (rating.rating_val < 7) continue;
@@ -72,11 +77,12 @@ void Recommend()
         .OrderByDescending(kv => kv.Value).Take(3).Select(kv => kv.Key);
     foreach (var filmId in topThreeFilms)
     {
-        Console.WriteLine($"Have you watched the movie \"{movieById[filmId]}\"?");
-        Console.WriteLine($"If you want further information about the film, type this: \"Description {filmId}\"");
+        Console.WriteLine($"Have you watched the movie \"{movieById[filmId].MovieTitle}\"?");
+        Console.WriteLine($"If you want further information about the film, type this: \"describe {movieById[filmId].MovieTitle}\"");
         Console.WriteLine();
     }
 }
+
 void Rate(string command)
 {
     var commandArr = command.Split(" ");
@@ -90,23 +96,23 @@ void Rate(string command)
     var movieName = string.Join(" ", movieNameArr);
     if (!movieByName.ContainsKey(movieName))
     {
-        List<string>? bestMatches = FindBestMatches(movieName);
-        if (bestMatches.Count == 0)
-        {
-            Console.WriteLine("Looks like we don't know this movie");
-            return;        
-        }
+        var similarMovies = movieByName.Keys.OrderBy(key => LevenshteinDistance(movieName, key)).Take(3).ToArray();
 
         Console.WriteLine($"Looks like you've made a typo. Maybe instead of {movieName} you meant:");
-        foreach (var option in bestMatches)
-        {
+
+        foreach (var option in similarMovies)
             Console.WriteLine(option);
-        }
+
         return;
     }
 
-    Film curMovie = movieByName[movieName];
-    // i haven't done it yet, but we need to check if user gives us new review, or just repeats itself
+    var curMovie = movieByName[movieName];
+    if (preciousUser.AllMovieIds().Contains(curMovie.MovieId))
+    {
+        Console.WriteLine("Sorry, you've already rated the movie.");
+        Console.WriteLine();
+        return;
+    }
     var rating = new Rating
     {
         rating_val = intRatingVal,
@@ -119,11 +125,11 @@ void Rate(string command)
 
 List<string>? FindBestMatches(string inputMovieName)
 {
-    int possibleDistance = inputMovieName.Length / 5;
+    var possibleDistance = inputMovieName.Length / 5;
     List<string> bestMatches = new List<string>();
     foreach (var word in movieByName.Keys)
     {
-        int distance = LevenshteinDistance(inputMovieName, word);
+        var distance = LevenshteinDistance(inputMovieName, word);
         if (distance <= possibleDistance)
         {
             bestMatches.Add(word);
@@ -136,19 +142,19 @@ int LevenshteinDistance(string original, string candidate)
 {
     // preparation stage
     var array = new int[candidate.Length + 1, original.Length + 1];
-    for (int i = 0; i <= candidate.Length; i++)
+    for (var i = 0; i <= candidate.Length; i++)
     {
         array[i, 0] = i;
     }
 
-    for (int j = 0; j <= original.Length; j++)
+    for (var j = 0; j <= original.Length; j++)
     {
         array[0, j] = j;
     }
 
-    for (int i = 1; i <= candidate.Length; i++)
+    for (var i = 1; i <= candidate.Length; i++)
     {
-        for (int j = 1; j <= original.Length; j++)
+        for (var j = 1; j <= original.Length; j++)
         {
             array[i, j] = Math.Min(Math.Min(array[i - 1, j] + 1, // deletion
                     array[i, j - 1] + 1), // insertion
@@ -243,7 +249,19 @@ void Discover(string command)
 
 void Describe(string command)
 {
-    Console.WriteLine(movieById[command.Split(' ')[1]].Description());
+    var name = command[9..];
+    if (movieByName.TryGetValue(name, out var value))
+    {
+        Console.WriteLine(value.Description());
+        return;
+    }
+
+    var similarMovies = movieByName.Keys.OrderBy(key => LevenshteinDistance(name, key)).Take(3).ToArray();
+
+    Console.WriteLine("Sorry, we don't know what you meant, but here we have some possible options: ");
+
+    foreach (var movieName in similarMovies)
+        Console.WriteLine(movieName);
 }
 
 
@@ -278,7 +296,7 @@ void Describe(string command)
     Console.WriteLine("Users picked! ");
     Console.WriteLine("Working on reviews... ");
 
-    AddReviewsToUsers(userByUsername, movieById); 
+    AddReviewsToUsers(userByUsername); 
     Console.WriteLine("Reviews added! ");
 
     Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
@@ -313,7 +331,7 @@ List<Film> ReadFilms()
             try
             {
                 var film = csv.GetRecord<Film>();
-                if (film.Genres == null) continue;
+                if (film!.Genres == null) continue;
                 if (film.Genres.Contains("Drama") || film.Genres.Contains("Comedy") ||
                     film.Genres.Contains("Documentary") || film.Genres.Contains("Thriller") ||
                     film.Genres.Contains("Romance") || film.Genres.Contains("Action") ||
@@ -345,12 +363,12 @@ List<User> ReadUserCsv()
     while (csv.Read())
     {
         var user = csv.GetRecord<User>();
-        records.Add(user);
+        records.Add(user!);
     }
     return records;
 }
 
-void AddReviewsToUsers(Dictionary<string, User> userByUsername, Dictionary<string, Film> movieById)
+void AddReviewsToUsers(Dictionary<string, User> userByUsername)
 {
     const string moviePath1 = "ratings_export.csv";
     const string moviePath2 = "D:\\C#Projects\\Top-Movie-Picks\\top movie picks\\ratings_export.csv";
@@ -363,11 +381,11 @@ void AddReviewsToUsers(Dictionary<string, User> userByUsername, Dictionary<strin
         while (csv.Read())
         {
             var record = csv.GetRecord<Rating>();
-            if (!userByUsername.ContainsKey(record.user_id)) continue;
+            if (!userByUsername.ContainsKey(record!.user_id)) continue;
             var curUser = userByUsername[record.user_id];
             var curMovie = record.movie_id;
             if (!movieById.ContainsKey(curMovie)) continue;
-            string[] genres = movieById[curMovie].Genres;
+            var genres = movieById[curMovie].Genres;
             curUser.AddRating(record, genres);
         }
     }
@@ -384,9 +402,7 @@ int DeleteUsersWithoutReviews(List<User> users)
     }
 
     foreach (var user in usersToDelete)
-    {
         users.Remove(user);
-    }
 
     return counter;
 }
@@ -394,9 +410,7 @@ int DeleteUsersWithoutReviews(List<User> users)
 void CreateSpace(List<User> users)
 {
     foreach (var variableUser in users)
-    {
         variableUser.CountCoordinates();
-    }
 }
 
 

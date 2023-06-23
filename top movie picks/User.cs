@@ -6,7 +6,7 @@ public class User
     public int num_reviews { get; set; }
     public string username { get; set; }
     public int globalMinimum = 10;
-    public int globalMaximum = 0;
+    public int globalMaximum = 1;
 
     public Genre drama;
 
@@ -56,7 +56,7 @@ public class User
         {
             if (genre.ratings.Count == 0)
             {
-                genre.average = 0;
+                genre.average = 5.5;
                 continue;
             }
 
@@ -67,6 +67,12 @@ public class User
             if (localMaximum > globalMaximum)
                 globalMaximum = localMaximum;
             genre.average = genre.ratings.Average(rating => rating.rating_val);
+        }
+
+        if (globalMinimum == globalMaximum)
+        {
+            globalMinimum = 1;
+            globalMaximum = 10;
         }
 
         foreach (var genre in Genres)
@@ -88,7 +94,7 @@ public class User
             $"{username} -- {num_reviews}: {drama} - {comedy} - {action} - {romance} - {fiction} - {animation} - {thriller} - {documentary}";
     }
 
-    public void AddRating(Rating rating, string[] genres)
+    public void AddRating(Rating rating, string[]? genres)
     {
         if (genres.Length == 0)
         {
