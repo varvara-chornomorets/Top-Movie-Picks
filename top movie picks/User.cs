@@ -1,5 +1,4 @@
-﻿
-namespace top_movie_picks;
+﻿namespace top_movie_picks;
 
 public class User
 {
@@ -23,6 +22,8 @@ public class User
     public Genre thriller;
 
     public Genre documentary;
+    
+    public string MovieRates => DataString();
 
     public List<Genre> Genres => new()
     {
@@ -87,7 +88,7 @@ public class User
 
     public string[] AllMovieIds() =>
         (from genre in Genres from rating in genre.ratings select rating.movie_id).ToArray();
-
+    
     public override string ToString()
     {
         return
@@ -148,4 +149,8 @@ public class User
             _ => throw new ArgumentException("Invalid genre"),
         };
     }
+
+    private string DataString() => "[ " + string.Join(", ", Genres
+        .Select(genre => $"({genre.average}, [{string.Join(", ", genre.ratings
+            .Select(rating => $"({rating.movie_id}, {rating.rating_val})"))}]")) + "]";
 }

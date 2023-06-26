@@ -3,6 +3,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace top_movie_picks;
 
+[Serializable]
 public class Rating
 {
     public string movie_id{ get; set; }

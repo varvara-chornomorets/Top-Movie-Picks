@@ -1,6 +1,7 @@
 using System.Collections;
 using CsvHelper;
 using System.Globalization;
+using System.Text.Json;
 using top_movie_picks;
 
 var movieById = new Dictionary<string, Film>();
@@ -157,21 +158,6 @@ void Rate(string command)
     // Console.WriteLine(preciousUser);
 }
 
-List<string>? FindBestMatches(string inputMovieName)
-{
-    var possibleDistance = inputMovieName.Length / 5;
-    var bestMatches = new List<string>();
-    foreach (var word in movieByName.Keys)
-    {
-        var distance = LevenshteinDistance(inputMovieName, word);
-        if (distance <= possibleDistance)
-        {
-            bestMatches.Add(word);
-        }
-    }
-    return bestMatches;
-}
-
 int LevenshteinDistance(string original, string candidate)
 {
     // preparation stage
@@ -201,11 +187,11 @@ int LevenshteinDistance(string original, string candidate)
     }
 
     return array[candidate.Length, original.Length];
-}
 
-int IsDifferent(char first, char second)
-{
-    return first == second ? 0 : 1;
+    int IsDifferent(char first, char second)
+    {
+        return first == second ? 0 : 1;
+    }
 }
 
 void Discover()
@@ -310,14 +296,8 @@ void Describe(string command)
         movieNames[movie.MovieTitle] = movie;
     }
     movies = movies.OrderByDescending(m => m.Popularity).ToList();
-    popularMovies.AddRange(movies.Where(movie => movie.VoteAverage > 8).Take(1000));
-    
-    // foreach (var movie in popularMovies)
-    // {
-    //     Console.WriteLine(movie.MovieTitle);
-    // }
-        
-
+    popularMovies.AddRange(movies.Where(movie => movie.VoteAverage > 8).Take(1000)); 
+    //
     var users = ReadUserCsv();
     foreach (var user in users)
     {
@@ -332,6 +312,9 @@ void Describe(string command)
     Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
 
     CreateSpace(users);
+    var jsonText = JsonSerializer.Serialize(users.Select(user => new { user.username, user.MovieRates }).Take(80));
+    File.WriteAllText("users.json", jsonText);
+    //
     return (users, movieNames, popularMovies);
 }
 
