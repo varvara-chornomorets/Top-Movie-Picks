@@ -1,5 +1,5 @@
 ﻿namespace top_movie_picks;
-[Serializable]
+
 public class Genre
 {
     public List<Rating> ratings;
