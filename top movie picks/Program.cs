@@ -283,6 +283,8 @@ void Describe(string command)
 
 (List<User>  users, Dictionary<string, Film> movieNames, List<Film> popularFilms) Preparation()
 {
+    //var jsonReadText = File.ReadAllText("users.json");
+    //var usersJson = JsonSerializer.Deserialize<User>(jsonReadText);
     var userByUsername = new Dictionary<string, User>();
     var movieNames = new Dictionary<string, Film>();
     var popularMovies = new List<Film>();

@@ -22,8 +22,20 @@ public class User
     public Genre thriller;
 
     public Genre documentary;
-    
-    public string MovieRates => DataString();
+
+    public string MovieRates
+    {
+        get => DataString();
+        /*
+        set
+        {
+            var genreData = value.Trim('[', ']').Split(", ");
+            foreach (var genreInfo in genreData)
+            {
+                
+            }
+        }*/
+    }
 
     public List<Genre> Genres => new()
     {
@@ -150,7 +162,7 @@ public class User
         };
     }
 
-    private string DataString() => "[ " + string.Join(", ", Genres
+    private string DataString() => string.Join(", ", Genres
         .Select(genre => $"({genre.average}, [{string.Join(", ", genre.ratings
-            .Select(rating => $"({rating.movie_id}, {rating.rating_val})"))}]")) + "]";
+            .Select(rating => $"({rating.movie_id}, {rating.rating_val})"))}])"));
 }
