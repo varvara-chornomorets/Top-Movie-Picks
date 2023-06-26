@@ -283,8 +283,6 @@ void Describe(string command)
 
 (List<User>  users, Dictionary<string, Film> movieNames, List<Film> popularFilms) Preparation()
 {
-    //var jsonReadText = File.ReadAllText("users.json");
-    //var usersJson = JsonSerializer.Deserialize<User>(jsonReadText);
     var userByUsername = new Dictionary<string, User>();
     var movieNames = new Dictionary<string, Film>();
     var popularMovies = new List<Film>();
@@ -299,7 +297,12 @@ void Describe(string command)
     }
     movies = movies.OrderByDescending(m => m.Popularity).ToList();
     popularMovies.AddRange(movies.Where(movie => movie.VoteAverage > 8).Take(1000)); 
-    //
+    if (File.Exists("users.json"))
+    {
+        var jsonReadText = File.ReadAllText("users.json");
+        var usersJson = JsonSerializer.Deserialize<List<User>>(jsonReadText);
+        return (usersJson!, movieNames, popularMovies);
+    }
     var users = ReadUserCsv();
     foreach (var user in users)
     {
@@ -314,9 +317,8 @@ void Describe(string command)
     Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
 
     CreateSpace(users);
-    var jsonText = JsonSerializer.Serialize(users.Select(user => new { user.username, user.MovieRates }).Take(80));
+    var jsonText = JsonSerializer.Serialize(users.Select(user => new { user.username, user.MovieRates }));
     File.WriteAllText("users.json", jsonText);
-    //
     return (users, movieNames, popularMovies);
 }
 

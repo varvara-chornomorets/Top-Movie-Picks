@@ -28,22 +28,23 @@ public class User
         get => DataString();/*
         set
         {
-            var genreData = value.Split(", "); // (0,1111111111111111, [(the-florida-project, 2)]), ... (0,5, [])
+            var genreData = value.Split("]), "); // (0,1111111111111111, [(the-florida-project, 2)]), ... (0,5, [])
             for (var i = 0; i < 8; i++)
             {
-                var genreInfo = genreData[i].Trim('(', ')').Split(", ");
+                var genreInfo = genreData[i].Trim('(').Split(", "); // <0,634480100221644>, <[(feast-2014>, <7)>, ... <(mank>, <5)>
                 var averageRate = double.Parse(genreInfo[0]);
-                if (Math.Abs(averageRate - 0.5) < 0.01)
+                if (Math.Abs(averageRate - 0.5) < 0.01 || genreInfo[1].Length <= 2)
                 {
                     Genres[i].average = 0.5;
                     continue;
                 }
 
                 Genres[i].average = averageRate;
-                var allRates = genreInfo[1].Trim('[', ']').Split(", ");
-                foreach (var rate in allRates)
+                var allRates = string.Join(", ", genreInfo[1..]).Trim('[').Split("), ");
+                // <(feast-2014, 7>), <(loving-2016, 7>), <(the-future, 4>), <(mank, 5>), <(embers-2015, 5>), <(the-social-network, 10)>
+                foreach (var rate in allRates) // (feast-2014, 7     ...    // (the-social-network, 10)
                 {
-                    var valAndId = rate.Trim('(', ')').Split(", ");
+                    var valAndId = rate.Trim('(', ')', ']').Split(", ");
                     var rating = new Rating
                     {
                         rating_val = int.Parse(valAndId[1]),
