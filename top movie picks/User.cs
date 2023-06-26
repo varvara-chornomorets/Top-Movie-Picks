@@ -25,7 +25,7 @@ public class User
 
     public string MovieRates
     {
-        get => DataString();/*
+        get => DataString();
         set
         {
             var genreData = value.Split("]), "); // (0,1111111111111111, [(the-florida-project, 2)]), ... (0,5, [])
@@ -33,7 +33,7 @@ public class User
             {
                 var genreInfo = genreData[i].Trim('(').Split(", "); // <0,634480100221644>, <[(feast-2014>, <7)>, ... <(mank>, <5)>
                 var averageRate = double.Parse(genreInfo[0]);
-                if (Math.Abs(averageRate - 0.5) < 0.01 || genreInfo[1].Length <= 2)
+                if (Math.Abs(averageRate - 0.5) < 0.01 || genreInfo[1].Length <= 5)
                 {
                     Genres[i].average = 0.5;
                     continue;
@@ -53,7 +53,7 @@ public class User
                     Genres[i].ratings.Add(rating);
                 }
             }
-        }*/
+        }
     }
 
     public List<Genre> Genres => new()
