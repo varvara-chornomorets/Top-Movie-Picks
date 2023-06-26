@@ -25,14 +25,32 @@ public class User
 
     public string MovieRates
     {
-        get => DataString();
-        /*
+        get => DataString();/*
         set
         {
-            var genreData = value.Trim('[', ']').Split(", ");
-            foreach (var genreInfo in genreData)
+            var genreData = value.Split(", "); // (0,1111111111111111, [(the-florida-project, 2)]), ... (0,5, [])
+            for (var i = 0; i < 8; i++)
             {
-                
+                var genreInfo = genreData[i].Trim('(', ')').Split(", ");
+                var averageRate = double.Parse(genreInfo[0]);
+                if (Math.Abs(averageRate - 0.5) < 0.01)
+                {
+                    Genres[i].average = 0.5;
+                    continue;
+                }
+
+                Genres[i].average = averageRate;
+                var allRates = genreInfo[1].Trim('[', ']').Split(", ");
+                foreach (var rate in allRates)
+                {
+                    var valAndId = rate.Trim('(', ')').Split(", ");
+                    var rating = new Rating
+                    {
+                        rating_val = int.Parse(valAndId[1]),
+                        movie_id = valAndId[0]
+                    };
+                    Genres[i].ratings.Add(rating);
+                }
             }
         }*/
     }
