@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics;
 using CsvHelper;
 using System.Globalization;
 using top_movie_picks;
@@ -320,8 +321,8 @@ void Describe(string command)
     // {
     //     Console.WriteLine(movie.MovieTitle);
     // }
-        
-
+    var sw = new Stopwatch();
+    sw.Start();
     var users = ReadUserCsv();
     foreach (var user in users)
     {
@@ -336,6 +337,8 @@ void Describe(string command)
     Console.WriteLine($"Empty users: {DeleteUsersWithoutReviews(users)}");
 
     CreateSpace(users);
+    sw.Stop();
+    Console.WriteLine($"Elapsed time: {sw.Elapsed}"); // 33.4140114   /   32.2485422   /   36.8776577
     return (users, movieNames, popularMovies);
 }
 
