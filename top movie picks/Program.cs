@@ -56,7 +56,7 @@ while (true)
     }
     if (command.Contains("discover"))
     {
-        Discover(command);
+        Discover();
         continue;
     }
     if (command.Contains("describe"))
@@ -140,7 +140,7 @@ void Rate(string command)
 
         return;
     }
-
+    
     var curMovie = movieByName[movieName];
     if (preciousUser.AllMovieIds().Contains(curMovie.MovieId))
     {
@@ -155,23 +155,9 @@ void Rate(string command)
     };
     preciousUser.AddRating(rating, curMovie.Genres);
     Console.WriteLine("Okay, we've got your review, let's continue");
-    // Console.WriteLine(preciousUser);
+
 }
 
-List<string>? FindBestMatches(string inputMovieName)
-{
-    var possibleDistance = inputMovieName.Length / 5;
-    List<string> bestMatches = new List<string>();
-    foreach (var word in movieByName.Keys)
-    {
-        var distance = LevenshteinDistance(inputMovieName, word);
-        if (distance <= possibleDistance)
-        {
-            bestMatches.Add(word);
-        }
-    }
-    return bestMatches;
-}
 
 int LevenshteinDistance(string original, string candidate)
 {
@@ -202,14 +188,15 @@ int LevenshteinDistance(string original, string candidate)
     }
 
     return array[candidate.Length, original.Length];
+    int IsDifferent(char first, char second)
+    {
+        return first == second ? 0 : 1;
+    }
 }
 
-int IsDifferent(char first, char second)
-{
-    return first == second ? 0 : 1;
-}
 
-void Discover(string command)
+
+void Discover()
 {
     Console.WriteLine("Welcome to discover! Here we will ask your opinion about some movies, and then we will give you recommendations." +
                       "\nIf you feel bored during this process - type in 'stop' or 'exit' and we will stop.");
@@ -225,46 +212,47 @@ void Discover(string command)
             Console.WriteLine("You decided to stop 'discover'.");
             break;
         }
-        else if (answer is "Y" or "Yes" or "yes" or "yeah" or "YES")
+        switch (answer)
         {
-            while (true)
+            case "Y" or "Yes" or "yes" or "yeah" or "YES":
             {
-                Console.WriteLine($"What is your rate of this movie ({curFilm.MovieTitle}) from 1 to 10?");
-                string ratingVal = Console.ReadLine();
-                if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
+                while (true)
                 {
-                    Console.WriteLine("Looks like your rate is not valid");
-                    continue;
+                    Console.WriteLine($"What is your rate of this movie ({curFilm.MovieTitle}) from 1 to 10?");
+                    var ratingVal = Console.ReadLine();
+                    if (!int.TryParse(ratingVal, out var intRatingVal) || intRatingVal is < 1 or > 10)
+                    {
+                        Console.WriteLine("Looks like your rate is not valid");
+                        continue;
+                    }
+
+                    if (intRatingVal is > 10 or < 1)
+                    {
+                        Console.WriteLine("Looks like you rate is not valid. Please use numbers from 1 to 10");
+                        continue;
+                    }
+
+                    Rating rating = new Rating()
+                    {
+                        rating_val = intRatingVal,
+                        movie_id = curFilm.MovieId
+                    };
+                    preciousUser.AddRating(rating, curFilm.Genres);
+                    added++;
+                    proposed++;
+                    popularFilms.Remove(curFilm);
+                    break;
                 }
 
-                if (intRatingVal is > 10 or < 1)
-                {
-                    Console.WriteLine("Looks like you rate is not valid. Please use numbers from 1 to 10");
-                    continue;
-                }
-
-                Rating rating = new Rating()
-                {
-                    rating_val = intRatingVal,
-                    movie_id = curFilm.MovieId
-                };
-                preciousUser.AddRating(rating, curFilm.Genres);
-                added++;
-                proposed++;
-                popularFilms.Remove(curFilm);
                 break;
             }
-            
-        }
-
-        else if (answer is "N" or "No" or "no" or "nope" or "NO")
-        {
-            popularFilms.Remove(curFilm);
-            proposed++;
-        }
-        else
-        {
-            Console.WriteLine("Sorry, we didn't get what you mean. Please type in 'Yes' or 'No'");
+            case "N" or "No" or "no" or "nope" or "NO":
+                popularFilms.Remove(curFilm);
+                proposed++;
+                break;
+            default:
+                Console.WriteLine("Sorry, we didn't get what you mean. Please type in 'Yes' or 'No'");
+                break;
         }
 
         if (added == 7)
@@ -317,10 +305,6 @@ void Describe(string command)
     movies = movies.OrderByDescending(m => m.Popularity).ToList();
     popularMovies.AddRange(movies.Where(movie => movie.VoteAverage > 8).Take(1000));
     
-    // foreach (var movie in popularMovies)
-    // {
-    //     Console.WriteLine(movie.MovieTitle);
-    // }
     var sw = new Stopwatch();
     sw.Start();
     var users = ReadUserCsv();
