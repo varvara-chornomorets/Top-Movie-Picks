@@ -200,21 +200,27 @@ void Discover()
 {
     Console.WriteLine("Welcome to discover! Here we will ask your opinion about some movies, and then we will give you recommendations." +
                       "\nIf you feel bored during this process - type in 'stop' or 'exit' and we will stop.");
-    int proposed = 0;
-    int added = 0;
+    var proposed = 0;
+    var added = 0;
     while (true)
     {
         var curFilm = popularFilms[0];
         Console.WriteLine($"Have you seen {curFilm.MovieTitle}? Yes/No ");
-        string answer = Console.ReadLine();
-        if (answer is "Exit" or "exit" or "stop" or "e" or "Stop" or "STOP")
+        var answer = Console.ReadLine();
+        if (answer == null)
+        {
+            Console.WriteLine("Sorry, we didn't get what you mean. Please type in 'Yes' or 'No'");
+            break;
+        }
+
+        if (char.ToLower(answer[0]) is 'e' or 's') // Exit or Stop
         {
             Console.WriteLine("You decided to stop 'discover'.");
             break;
         }
-        switch (answer)
+        switch (char.ToLower(answer[0]))
         {
-            case "Y" or "Yes" or "yes" or "yeah" or "YES":
+            case 'y': // yeah
             {
                 while (true)
                 {
@@ -232,7 +238,7 @@ void Discover()
                         continue;
                     }
 
-                    Rating rating = new Rating()
+                    var rating = new Rating()
                     {
                         rating_val = intRatingVal,
                         movie_id = curFilm.MovieId
@@ -246,7 +252,7 @@ void Discover()
 
                 break;
             }
-            case "N" or "No" or "no" or "nope" or "NO":
+            case 'n': // nope
                 popularFilms.Remove(curFilm);
                 proposed++;
                 break;
